@@ -18,25 +18,26 @@ import java.util.Scanner;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
-import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
+import javax.swing.JTextPane;
 import javax.swing.JToolBar;
-import javax.swing.ListModel;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultHighlighter;
+import javax.swing.text.Highlighter.HighlightPainter;
 
 public class MainWindow extends JFrame{
 
@@ -54,6 +55,9 @@ public class MainWindow extends JFrame{
 	//The file extension to expect
 	String fileExtension = "A1";
 
+	//Program counter
+	int programCounter = 0;
+	
 	//The number of registers
 	int registerCount = 8;
 
@@ -71,7 +75,7 @@ public class MainWindow extends JFrame{
 
 	//Keeps track of whether the code is currently executing
 	boolean isRunning = false;
-	
+
 	//The font size
 	int fontSize = 18;
 
@@ -82,13 +86,16 @@ public class MainWindow extends JFrame{
 	//UI Variables
 	//Buttons
 	JButton saveButton;
-
+	
 	//Text area
-	JTextArea codeTextArea;
+	JTextPane codeTextPane;
 
+	//Execution highlighter
+	HighlightPainter linePainter = new DefaultHighlighter.DefaultHighlightPainter( Color.gray );
+	
 	MainWindow() throws ClassNotFoundException, InstantiationException, IllegalAccessException, UnsupportedLookAndFeelException{
 		super();
-
+		
 		//Font
 		Charset.forName( "UTF-8" );
 		Font font = new Font( "Consolas", Font.PLAIN, fontSize );
@@ -124,7 +131,7 @@ public class MainWindow extends JFrame{
 				if( fileHasChanged ) {
 
 					int dialogResult = JOptionPane.showConfirmDialog(
-							codeTextArea,
+							codeTextPane,
 							"There are unsaved changes to this file.\n\nWould you like to save before exiting?",
 							"Warning",
 							JOptionPane.YES_NO_CANCEL_OPTION
@@ -163,13 +170,13 @@ public class MainWindow extends JFrame{
 		});
 
 		//Text pane
-		codeTextArea = new JTextArea();
-		codeTextArea.setFont( font );
-		codeTextArea.setTabSize( 3 );
-		codeTextArea.setDocument( new UpperCaseDocument() );
-		
+		codeTextPane = new JTextPane();
+		codeTextPane.setFont( font );
+		//codeTextArea.setTabSize( 3 );
+		codeTextPane.setDocument( new UpperCaseDocument() );
+
 		//Listener to catch changes
-		codeTextArea.getDocument().addDocumentListener( new DocumentListener() {
+		codeTextPane.getDocument().addDocumentListener( new DocumentListener() {
 
 			@Override
 			public void changedUpdate(DocumentEvent e) {}
@@ -181,7 +188,7 @@ public class MainWindow extends JFrame{
 
 			@Override
 			public void removeUpdate(DocumentEvent e) {
-				if( codeTextArea.getText().length() == 0 ) {
+				if( codeTextPane.getText().length() == 0 ) {
 					setFileHasChanged( false );
 				}else {
 					setFileHasChanged( true );
@@ -191,7 +198,7 @@ public class MainWindow extends JFrame{
 		});
 
 		//Keyboard listener for ctrl-s
-		codeTextArea.addKeyListener( new KeyListener() {
+		codeTextPane.addKeyListener( new KeyListener() {
 
 			boolean controlDown = false;
 
@@ -213,7 +220,7 @@ public class MainWindow extends JFrame{
 						event.consume();
 					}
 				}
-				
+
 			}
 
 			@Override
@@ -235,48 +242,48 @@ public class MainWindow extends JFrame{
 		});
 
 		//Code line numbers
-		TextLineNumber codeLineNumber = new TextLineNumber( codeTextArea );
+		TextLineNumber codeLineNumber = new TextLineNumber( codeTextPane );
 		codeLineNumber.setFont( font );
 
 		//Code scroll pane
-		JScrollPane codeScrollPane = new JScrollPane( codeTextArea );
+		JScrollPane codeScrollPane = new JScrollPane( codeTextPane );
 		codeScrollPane.setRowHeaderView( codeLineNumber );
 
 		//Registers
 		JPanel registersPanel = new JPanel();
 		registersPanel.setLayout( new BoxLayout( registersPanel, BoxLayout.X_AXIS ) );
 		registersPanel.setPreferredSize( new Dimension( 50 * registerCount, 50 ) );
-		
+
 		for (int i = 0; i < registerCount; i++) {
-			
+
 			//The panel to contain the register
 			JPanel register = new JPanel();
 			register.setLayout( new BorderLayout() );
 			register.setMinimumSize( new Dimension( 50, -1 ) );
 			register.setPreferredSize( new Dimension( 50, -1 ) );
-			
+
 			//Add a border
 			register.setBorder(BorderFactory.createLineBorder(Color.black));
-			
+
 			//The label to hold the register name
 			JLabel topLabel = new JLabel( "R" + i );
 			topLabel.setHorizontalAlignment( JLabel.CENTER );
 			topLabel.setFont( font );
 			register.add( topLabel, BorderLayout.NORTH );
-			
+
 			//The label to hold the register value
 			JLabel bottomLabel = new JLabel( "0" );
 			bottomLabel.setHorizontalAlignment( JLabel.CENTER );
 			bottomLabel.setFont( font );
 			register.add( bottomLabel, BorderLayout.SOUTH );
-			
+
 			//Add the bottom register to the registerLabels list so it can be edited later
 			registerLabels[ i ] = bottomLabel;
-			
+
 			//Add this register to the list
 			registersPanel.add( register );
 		}
-		
+
 
 		//Registers scroll pane
 		JScrollPane registersPanelScrollPane = new JScrollPane( registersPanel );
@@ -303,10 +310,6 @@ public class MainWindow extends JFrame{
 		topSplitPane.setDividerLocation( 500 );
 		this.add( topSplitPane, BorderLayout.CENTER );
 
-		//Tool bar
-		JToolBar toolbar = new JToolBar();
-		toolbar.setFloatable( false );
-
 		//New button
 		ImageIcon newIcon = new ImageIcon( iconPath + "new.png" );
 		JButton newButton = new JButton( newIcon );
@@ -320,7 +323,7 @@ public class MainWindow extends JFrame{
 				//Make sure they want to lose everything if there is something to lose
 				if( fileHasChanged ) {
 					int dialogResult = JOptionPane.showConfirmDialog(
-							codeTextArea,
+							codeTextPane,
 							"Creating a new file will destroy any changes in the current file.\n\nAre you sure you want to lose everything?",
 							"Warning",
 							JOptionPane.YES_NO_OPTION
@@ -337,7 +340,6 @@ public class MainWindow extends JFrame{
 			}
 
 		});
-		toolbar.add( newButton );
 
 		//Open button
 		ImageIcon openIcon = new ImageIcon( iconPath + "open.png" );
@@ -365,7 +367,7 @@ public class MainWindow extends JFrame{
 
 						//Make sure they want to lose everything
 						int dialogResult = JOptionPane.showConfirmDialog(
-								codeTextArea,
+								codeTextPane,
 								"Opening a file will destroy any changes in the current file.\n\nAre you sure you want to lose everything?",
 								"Warning",
 								JOptionPane.YES_NO_OPTION
@@ -389,7 +391,6 @@ public class MainWindow extends JFrame{
 			}
 
 		});
-		toolbar.add( openButton );
 
 		//Save button
 		ImageIcon saveIcon = new ImageIcon( iconPath + "save.png" );
@@ -404,45 +405,113 @@ public class MainWindow extends JFrame{
 			}
 
 		});
-		toolbar.add( saveButton );
-
-		
-		toolbar.addSeparator();
-
-		//Run button
-		ImageIcon runIcon = new ImageIcon( iconPath + "run.png" );
-		JButton runButton = new JButton( runIcon );
-		runButton.setFocusable( false );
-		runButton.setToolTipText( "Run" );
-		runButton.addActionListener( new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				System.out.println( "Run" );
-			}
-
-		});
-		toolbar.add( runButton );
 
 		//Step button
 		ImageIcon stepIcon = new ImageIcon( iconPath + "step.png" );
 		JButton stepButton = new JButton( stepIcon );
 		stepButton.setFocusable( false );
 		stepButton.setEnabled( false );
-		stepButton.setToolTipText( "Step" );
+		stepButton.setToolTipText( "Step forward" );
 		stepButton.addActionListener( new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				
-				
-				
+
+				try {
+					step();
+				} catch (BadLocationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
 			}
 
 		});
-		toolbar.add( stepButton );
 
-		 
+
+		//Fast forward button
+		ImageIcon fastForwardIcon = new ImageIcon( iconPath + "fastforward.png" );
+		JButton fastForwardButton = new JButton( fastForwardIcon );
+		fastForwardButton.setFocusable( false );
+		fastForwardButton.setEnabled( false );
+		fastForwardButton.setToolTipText( "Run to next pause" );
+		fastForwardButton.addActionListener( new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+
+				
+
+			}
+
+		});
+
+		//Run/Stop button
+		ImageIcon runIcon = new ImageIcon( iconPath + "run.png" );
+		ImageIcon stopIcon = new ImageIcon( iconPath + "stop.png" );
+		JButton runStopButton = new JButton( runIcon );
+		runStopButton.setFocusable( false );
+		runStopButton.setToolTipText( "Start running" );
+		runStopButton.addActionListener( new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+
+				//Enable/Disable buttons
+				saveButton.setEnabled( isRunning );
+				newButton.setEnabled( isRunning );
+				openButton.setEnabled( isRunning );
+
+				stepButton.setEnabled( !isRunning );
+				fastForwardButton.setEnabled( !isRunning );
+				
+				//Enable/Disable editing
+				codeTextPane.setEditable( isRunning );
+				codeTextPane.setFocusable( isRunning );
+				
+				//If we're running, act as a stop button
+				if( isRunning ) {
+
+					//Change the icon
+					runStopButton.setIcon( runIcon );
+					
+					//Update the tooltip
+					runStopButton.setToolTipText( "Start running" );
+					
+					isRunning = false;
+
+				}else {
+					//Otherwise, act as a play button
+
+					//Change the icon
+					runStopButton.setIcon( stopIcon );
+					
+					//Update the tooltip
+					runStopButton.setToolTipText( "Stop running" );
+					
+					isRunning = true;
+				}
+
+			}
+
+		});
+		
+		
+		//Toolbar
+		JToolBar toolbar = new JToolBar();
+		toolbar.setFloatable( false );
+		
+		toolbar.add( newButton );
+		toolbar.add( openButton );
+		toolbar.add( saveButton );
+		
+		toolbar.addSeparator();
+		
+		toolbar.add( runStopButton );
+		toolbar.add( stepButton );
+		toolbar.add( fastForwardButton );
+
+
 
 		this.add( toolbar, BorderLayout.NORTH );
 
@@ -451,6 +520,14 @@ public class MainWindow extends JFrame{
 		//Make sure we properly set up the empty default file
 		closeFile();
 
+	}
+	
+	//Performs the next step in execution
+	//Arguably this is the entire program
+	public void step() throws BadLocationException {
+		
+		programCounter++;
+		
 	}
 
 	//Returns whether or not a file is open
@@ -481,7 +558,7 @@ public class MainWindow extends JFrame{
 		fileChooser.setCurrentDirectory( currentFile ); 
 
 		//Get their response
-		int returnVal = fileChooser.showSaveDialog( codeTextArea );
+		int returnVal = fileChooser.showSaveDialog( codeTextPane );
 
 		//Open a file if they chose one
 		if( returnVal == JFileChooser.APPROVE_OPTION ) {
@@ -509,7 +586,7 @@ public class MainWindow extends JFrame{
 			FileWriter writer = new FileWriter( file );
 
 			//Save the file
-			writer.write( codeTextArea.getText() );
+			writer.write( codeTextPane.getText() );
 
 			//Close the writer
 			writer.flush();
@@ -564,7 +641,7 @@ public class MainWindow extends JFrame{
 			scanner.close();
 
 			//Put the loaded file in the text area
-			codeTextArea.setText( fileContents );
+			codeTextPane.setText( fileContents );
 
 			//Update the title
 			updateTitle();
@@ -589,7 +666,7 @@ public class MainWindow extends JFrame{
 		updateTitle();
 
 		//Empty any text that might linger
-		codeTextArea.setText( "" );
+		codeTextPane.setText( "" );
 
 		//Empty files have no changes
 		setFileHasChanged( false );
