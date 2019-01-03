@@ -20,6 +20,7 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
@@ -45,6 +46,9 @@ public class MainWindow extends JFrame{
 	
 	//The file extension to expect
 	String fileExtension = "A1";
+	
+	//The number of registers
+	int registerCount = 4;
 	
 	//Path to the icons
 	String iconPath = "resources/icons/";
@@ -223,6 +227,10 @@ public class MainWindow extends JFrame{
 		JScrollPane codeScrollPane = new JScrollPane( codeTextArea );
 		codeScrollPane.setRowHeaderView( codeLineNumber );
 		
+		//Registers
+		JButton registers = new JButton();
+		registers.setMaximumSize( new Dimension( 9999, 24 ) );
+		
 		//Console
 		JTextArea consoleTextArea = new JTextArea( 3, 10 );
 		consoleTextArea.setFont( font );
@@ -232,14 +240,20 @@ public class MainWindow extends JFrame{
 		//Console scroll pane
 		JScrollPane consoleScrollPane = new JScrollPane( consoleTextArea );
 		
-		//Split pane to split code from console
-		JSplitPane splitPane = new JSplitPane( JSplitPane.VERTICAL_SPLIT );
-		splitPane.setTopComponent( codeScrollPane );
-		splitPane.setBottomComponent( consoleScrollPane );
-		splitPane.setDividerLocation( 550 );
-		this.add( splitPane, BorderLayout.CENTER );
+		//Panel for the console and registers
+		JPanel bottomPanel = new JPanel();
+		bottomPanel.setLayout( new BorderLayout() );
+		bottomPanel.add( registers, BorderLayout.NORTH );
+		bottomPanel.add( consoleScrollPane, BorderLayout.CENTER );
 		
-
+		
+		//Split pane to split code from the bottom pieces
+		JSplitPane topSplitPane = new JSplitPane( JSplitPane.VERTICAL_SPLIT );
+		topSplitPane.setTopComponent( codeScrollPane );
+		topSplitPane.setBottomComponent( bottomPanel );
+		topSplitPane.setDividerLocation( 500 );
+		this.add( topSplitPane, BorderLayout.CENTER );
+		
 		//Tool bar
 		JToolBar toolbar = new JToolBar();
 		toolbar.setFloatable( false );
