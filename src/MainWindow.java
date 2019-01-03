@@ -15,16 +15,21 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Scanner;
 
+import javax.swing.BoxLayout;
+import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.JToolBar;
+import javax.swing.ListModel;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.DocumentEvent;
@@ -48,7 +53,13 @@ public class MainWindow extends JFrame{
 	String fileExtension = "A1";
 	
 	//The number of registers
-	int registerCount = 4;
+	int registerCount = 20;
+	
+	//The actual registers themselves
+	int[] registers = new int[ registerCount ];
+	
+	//Stores the labels associated with the registers
+	JLabel[] registerLabels = new JLabel[ registerCount ];
 	
 	//Path to the icons
 	String iconPath = "resources/icons/";
@@ -228,8 +239,26 @@ public class MainWindow extends JFrame{
 		codeScrollPane.setRowHeaderView( codeLineNumber );
 		
 		//Registers
-		JButton registers = new JButton();
-		registers.setMaximumSize( new Dimension( 9999, 24 ) );
+		JPanel registersPanel = new JPanel();
+		registersPanel.setLayout( new BoxLayout( registersPanel, BoxLayout.X_AXIS ) );
+		registersPanel.setPreferredSize( new Dimension( -1, 30 ) );
+		
+        DefaultListModel<String> listModel = new DefaultListModel<String>();
+        
+		//Add register labels
+		for (int i = 0; i < registerCount; i++) {
+			
+			listModel.addElement( "R" + i );
+		}
+		
+		JList<String> list = new JList<String>( listModel );
+        list.setVisibleRowCount( 1 );
+        list.setLayoutOrientation( JList.HORIZONTAL_WRAP );
+        
+        registersPanel.add( list );
+		
+		//Registers scroll pane
+		JScrollPane registersPanelScrollPane = new JScrollPane( registersPanel );
 		
 		//Console
 		JTextArea consoleTextArea = new JTextArea( 3, 10 );
@@ -243,9 +272,8 @@ public class MainWindow extends JFrame{
 		//Panel for the console and registers
 		JPanel bottomPanel = new JPanel();
 		bottomPanel.setLayout( new BorderLayout() );
-		bottomPanel.add( registers, BorderLayout.NORTH );
+		bottomPanel.add( registersPanelScrollPane, BorderLayout.NORTH );
 		bottomPanel.add( consoleScrollPane, BorderLayout.CENTER );
-		
 		
 		//Split pane to split code from the bottom pieces
 		JSplitPane topSplitPane = new JSplitPane( JSplitPane.VERTICAL_SPLIT );
