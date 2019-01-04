@@ -322,7 +322,7 @@ public class TextLineNumber extends JPanel
 		Element line = root.getElement( index );
 
 		if (line.getStartOffset() == rowStartOffset)
-			return String.valueOf(index + 1);
+			return String.valueOf(index);
 		else
 			return "";
 	}

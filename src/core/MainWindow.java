@@ -551,6 +551,9 @@ public class MainWindow extends JFrame{
 		//Reset the logic
 		logic.reset();
 		
+		//Preprocess the code
+		logic.preprocess();
+		
 		//Disable editing items
 		saveButton.setEnabled( false );
 		newButton.setEnabled( false );
@@ -654,9 +657,7 @@ public class MainWindow extends JFrame{
 
 			//If it doesn't end in the appropriate extension, add it on
 			if( !saveFile.getName().toLowerCase().endsWith( "." + Config.fileExtension.toLowerCase() ) ) {
-
 				saveFile = new File( saveFile.getAbsolutePath() + "." + Config.fileExtension );
-
 			}
 
 			saveFile( saveFile );

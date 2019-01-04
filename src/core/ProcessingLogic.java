@@ -19,6 +19,9 @@ public class ProcessingLogic {
 
 	//The actual registers themselves
 	public Map<String, Integer> registers = new HashMap<String, Integer>();
+	
+	//Labels and their associated lines
+	public Map<String, Integer> labels = new HashMap<String, Integer>();
 
 	//Called when all main sections are created in primary
 	public void start() {
@@ -99,6 +102,8 @@ public class ProcessingLogic {
 		for (Entry<String, Integer> entry : registers.entrySet()) {
 			setRegisterValue( entry.getKey(), 0 );
 		}
+		
+		setRegisterValue( "PC", 0 );
 	}
 
 	//Returns whether the passed string references a valid register
@@ -152,11 +157,14 @@ public class ProcessingLogic {
 		//Get the current line
 		String line = window.getLine( getRegisterValue( "PC" ) );
 
+		//Increment the program counter
+		setRegisterValue( "PC",  getRegisterValue( "PC" ) + 1 );
+		
 		//Set to true to skip this line
 		boolean skip = false;
 
-		//Check if this is a comment line or an empty line
-		if( line.startsWith( "#" ) || line.trim().length() == 0 ) {
+		//Check if this is a comment line or an empty line or is a label
+		if( line.startsWith( "#" ) || line.trim().length() == 0 || line.endsWith(":") ) {
 			//ignore it
 			skip = true;
 		}
@@ -173,6 +181,9 @@ public class ProcessingLogic {
 				splitLine[ i ] = splitLine[ i ].trim();
 			}
 
+			//Skip incrementing the PC
+			boolean skipPC = false;
+			
 			//We're going to use a switch case for this
 			switch( splitLine[ 0 ] ) {
 			case "MOV":
@@ -206,9 +217,6 @@ public class ProcessingLogic {
 
 		}
 
-		//Increment the program counter
-		setRegisterValue( "PC",  getRegisterValue( "PC" ) + 1 );
-
 		//Check if we have reached the end of the code
 		if( !hasNextLine() ) {
 			print( "Execution finished" );
@@ -227,6 +235,34 @@ public class ProcessingLogic {
 		//As long as there are steps to take, step
 		while( hasNextLine() ) {
 			step();
+		}
+		
+	}
+	
+	//Look through the code and do any preprocessing that is needed before running
+	public void preprocess() {
+		
+		//Look for labels
+		
+		//Check every line
+		for (int i = 0; i < window.getLineCount(); i++) {
+			
+			//Get this line
+			String line = window.getLine( i );
+			
+			line = line.trim();
+			
+			//Check if it's a label
+			if( line.endsWith( ":" ) ) {
+				
+				//Get the name without the ending
+				String labelName = line.substring( 0, line.length() - 1 );
+				
+				//save it in the labels map
+				labels.put( labelName,  i );
+				
+			}
+			
 		}
 		
 	}
