@@ -435,14 +435,7 @@ public class MainWindow extends JFrame{
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-
-				try {
-					step();
-				} catch (BadLocationException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-
+				step();
 			}
 
 		});
@@ -459,7 +452,13 @@ public class MainWindow extends JFrame{
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 
-
+				
+				//As long as there are steps to take, step
+				while( hasNextLine() ) {
+					step();
+				}
+				
+				step();
 
 			}
 
@@ -996,7 +995,7 @@ public class MainWindow extends JFrame{
 
 	//Performs the next step in execution
 	//Arguably this is the entire program
-	public void step() throws BadLocationException {
+	public void step() {
 
 		if( hasNextLine() ) {
 			//Only if we have a previous line
@@ -1005,6 +1004,8 @@ public class MainWindow extends JFrame{
 				codeTextArea.getHighlighter().removeHighlight( previousLineHighlighter );
 			}
 
+			try {
+			
 			int lineStart = codeTextArea.getLineStartOffset( programCounter );
 			int lineEnd = codeTextArea.getLineEndOffset( programCounter );
 
@@ -1065,6 +1066,9 @@ public class MainWindow extends JFrame{
 			}
 
 			programCounter++;
+			} catch( BadLocationException E ) {
+				print( "Bad location error.  This should never happen" );
+			}
 		}else {
 			//Stop executing if we have run out of stuff to execute
 
