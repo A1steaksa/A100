@@ -20,7 +20,6 @@ import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JEditorPane;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -29,7 +28,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
-import javax.swing.JTextPane;
 import javax.swing.JToolBar;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -38,11 +36,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter;
-import javax.swing.text.DefaultStyledDocument;
-import javax.swing.text.Document;
 import javax.swing.text.Highlighter.HighlightPainter;
-import javax.swing.text.PlainDocument;
-import javax.swing.text.StyledDocument;
 
 public class MainWindow extends JFrame{
 
@@ -817,6 +811,13 @@ public class MainWindow extends JFrame{
 		//Convert to an int
 		int output = Integer.parseInt( argument );
 		
+		//Error checking
+		
+		//Make sure it's a valid register
+		if( output >= registerCount || output < 0 ) {
+			error( Strings.InvalidRegisterReference );
+		}
+		
 		return output;
 	}
 	
@@ -838,22 +839,36 @@ public class MainWindow extends JFrame{
 		}
 	}
 	
+	//Converts an argument string into a literal int
+	public int getLiteral( String argument ) {
+		int output = 0;
+		
+		try {
+			output = Integer.parseInt( argument );
+		} catch ( Exception e ) {
+			//If this isn't a register, and it isn't a literal number, we don't know what it is then
+			error( Strings.UnrecognizedDataType );
+		}
+		
+		//Check the output for out of bounds error
+		if( output > 999 || output < -999 ) {
+			error( Strings.NumberOutOfBounds );
+		}
+		
+		return output;
+	}
+	
 	//Performs the MOV command
 	public void MOV( String A, String B ) {
 		
-		int AValue = -1;
-		int BValue = -1;
+		int valueA = -1;
+		int valueB = -1;
 		
 		//If A is not a register, we need to get the value from what A references
 		if( !isRegister( A ) ) {
 			
 			//Convert A to an integer
-			try {
-				AValue = Integer.parseInt( A );
-			} catch ( Exception e ) {
-				//If this isn't a register, and it isn't a literal number, we don't know what it is then
-				error( Strings.UnrecognizedDataType );
-			}
+			valueA = getLiteral( A );
 			
 			//Now AInt contains the literal value of A
 		}else {
@@ -863,11 +878,11 @@ public class MainWindow extends JFrame{
 			int ARegisterNumber = getRegisterNumber( A );
 			
 			//Get A's register's value
-			AValue = registers[ ARegisterNumber ];
+			valueA = registers[ ARegisterNumber ];
 		}
 		
 		//Get B's register number
-		BValue = getRegisterNumber( B );
+		valueB = getRegisterNumber( B );
 		
 		//Error checking
 		
@@ -876,13 +891,55 @@ public class MainWindow extends JFrame{
 			error( Strings.ArgumentIsNotRegister );
 		}
 		
-		//Check the numbers for out of bounds error
-		if( AValue > 999 || AValue < -999 ) {
+		//If there are no errors, store AValue in the register corresponding to BValue
+		storeValueInRegister( valueA, valueB );
+		
+	}
+	
+	public void ADD( String A, String B, String C ) {
+		
+		//Stores the register number for C
+		int registerC = -1;
+		
+		//Process output register C
+		if( !isRegister( C ) ) {
+			error( Strings.ArgumentIsNotRegister );
+			return;
+		}else {
+			registerC = getRegisterNumber( C );
+		}
+		
+		//Values of A and B
+		int valueA = -1;
+		int valueB = -1;
+		
+		//Get values for A
+		if( isRegister( A ) ) {
+			int registerA = getRegisterNumber( A );
+			valueA = registers[ registerA ];
+		}else {
+			//Otherwise it's a literal
+			valueA = getLiteral( A );
+		}
+		
+		//Get values for B
+		if( isRegister( B ) ) {
+			int registerB = getRegisterNumber( B );
+			valueB = registers[ registerB ];
+		}else {
+			//Otherwise it's a literal
+			valueB = getLiteral( B );
+		}
+		
+		//Do the addition
+		int result = valueA + valueB;
+		
+		if( result > 999 || result < -999 ) {
 			error( Strings.NumberOutOfBounds );
 		}
 		
-		//If there are no errors, store AValue in the register corresponding to BValue
-		storeValueInRegister( AValue, BValue );
+		//Store the outcome
+		storeValueInRegister( result, registerC );
 		
 	}
 
@@ -929,9 +986,21 @@ public class MainWindow extends JFrame{
 				//We're going to use a switch case for this
 				switch( splitLine[ 0 ] ) {
 				case "MOV":
+					
+					if( splitLine.length != 3 ) {
+						error( Strings.WrongNumberOfArguments );
+					}
+					
 					MOV( splitLine[ 1 ], splitLine[ 2 ] );
 					break;
+				case "ADD":
 					
+					if( splitLine.length != 4 ) {
+						error( Strings.WrongNumberOfArguments );
+					}
+					
+					ADD( splitLine[ 1 ], splitLine[ 2 ], splitLine[ 3 ] );
+					break;
 				}
 				
 			}

@@ -9,4 +9,6 @@ public class Strings {
 	
 	public static String UnrecognizedDataType = "An argument was neither a register reference or a literal number!";
 	
+	public static String WrongNumberOfArguments = "The wrong number of arguments passed!";
+	
 }
