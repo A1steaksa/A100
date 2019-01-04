@@ -1,3 +1,4 @@
+package core;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -36,6 +37,10 @@ import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter;
+
+import misc.Config;
+import misc.TextLineNumber;
+import misc.UpperCaseDocument;
 
 public class MainWindow extends JFrame{
 
@@ -108,8 +113,8 @@ public class MainWindow extends JFrame{
 
 		//Main window properties
 		this.setTitle( Config.titleBase );
-		this.setSize( new Dimension( 500, 750 ) );
-		this.setMinimumSize( new Dimension( 500, 500 ) );
+		this.setSize( new Dimension( 600, 750 ) );
+		this.setMinimumSize( new Dimension( 600, 500 ) );
 		this.setLocationByPlatform( true );
 		this.setLayout( new BorderLayout() );
 		this.setDefaultCloseOperation( JFrame.DO_NOTHING_ON_CLOSE );
@@ -171,7 +176,10 @@ public class MainWindow extends JFrame{
 		//Text pane
 		codeTextArea = new JTextArea();
 		codeTextArea.setFont( font );
-		//codeTextArea.col
+		codeTextArea.setTabSize( 3 );
+		
+		//Used to convert typed text into uppercase on the fly
+		codeTextArea.setDocument( new UpperCaseDocument() );
 
 		//Listener to catch changes
 		codeTextArea.getDocument().addDocumentListener( new DocumentListener() {

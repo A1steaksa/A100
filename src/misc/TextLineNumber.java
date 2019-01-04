@@ -1,11 +1,32 @@
-import java.awt.*;
-import java.awt.event.*;
-import java.beans.*;
+package misc;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Insets;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.HashMap;
-import javax.swing.*;
-import javax.swing.border.*;
-import javax.swing.event.*;
-import javax.swing.text.*;
+
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.MatteBorder;
+import javax.swing.event.CaretEvent;
+import javax.swing.event.CaretListener;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Element;
+import javax.swing.text.JTextComponent;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.Utilities;
 
 /**
  *  This class will display line numbers for a related text component. The text
@@ -19,6 +40,10 @@ import javax.swing.text.*;
 public class TextLineNumber extends JPanel
 	implements CaretListener, DocumentListener, PropertyChangeListener
 {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	public final static float LEFT = 0.0f;
 	public final static float CENTER = 0.5f;
 	public final static float RIGHT = 1.0f;

@@ -1,3 +1,7 @@
+package core;
+import misc.Config;
+import misc.Strings;
+
 public class ProcessingLogic {
 
 	//A reference to the main window
@@ -14,8 +18,7 @@ public class ProcessingLogic {
 
 		//Get the main window reference
 		window = primary.mainWindow;
-
-
+		
 	}
 
 	//A wrapper for print
@@ -183,6 +186,9 @@ public class ProcessingLogic {
 
 					SUB( splitLine[ 1 ], splitLine[ 2 ], splitLine[ 3 ] );
 					break;
+					
+				default:
+					error( Strings.UnrecognizedOpcode );
 				}
 
 			}

@@ -1,3 +1,4 @@
+package misc;
 import java.awt.Color;
 
 public class Config {
@@ -31,7 +32,7 @@ public class Config {
 	public static int maxNumberRange = 9999;
 	
 	//The number of registers
-	public static int registerCount = 8;
+	public static int registerCount = 10;
 	
 	
 	
