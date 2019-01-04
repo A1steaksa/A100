@@ -44,7 +44,11 @@ public class MainWindow extends JFrame{
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-
+	
+	//The range of numbers the system can use
+	public static int minNumberRange = -9999;
+	public static int maxNumberRange = 9999;
+	
 	//The program title
 	String titleBase = "A100";
 
@@ -851,7 +855,7 @@ public class MainWindow extends JFrame{
 		}
 		
 		//Check the output for out of bounds error
-		if( output > 999 || output < -999 ) {
+		if( output > maxNumberRange || output < minNumberRange ) {
 			error( Strings.NumberOutOfBounds );
 		}
 		
@@ -934,7 +938,7 @@ public class MainWindow extends JFrame{
 		//Do the addition
 		int result = valueA + valueB;
 		
-		if( result > 999 || result < -999 ) {
+		if( result > maxNumberRange || result < -minNumberRange ) {
 			error( Strings.NumberOutOfBounds );
 		}
 		
