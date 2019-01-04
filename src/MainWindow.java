@@ -36,7 +36,6 @@ import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter;
-import javax.swing.text.Highlighter.HighlightPainter;
 
 public class MainWindow extends JFrame{
 
@@ -45,45 +44,20 @@ public class MainWindow extends JFrame{
 	 */
 	private static final long serialVersionUID = 1L;
 
-	//The range of numbers the system can use
-	public static int minNumberRange = -9999;
-	public static int maxNumberRange = 9999;
-
-	//The program title
-	String titleBase = "A100";
-
 	//The currently open file
 	String openFile = "";
-
-	//The file extension to expect
-	String fileExtension = "A1";
-
-	//Program counter
-	int programCounter = 0;
 
 	//The highlight of the last line executed.  We need this to remove that highlight
 	Object previousLineHighlighter;
 
-	//The number of registers
-	int registerCount = 8;
-
-	//The actual registers themselves
-	int[] registers = new int[ registerCount ];
-
 	//Stores the labels associated with the registers
-	JLabel[] registerLabels = new JLabel[ registerCount ];
-
-	//Path to the icons
-	String iconPath = "resources/icons/";
+	JLabel[] registerLabels = new JLabel[ Config.registerCount ];
 
 	//Keeps track of whether or not the file has been changed
 	boolean fileHasChanged = false;
 
 	//Keeps track of whether the code is currently executing
 	boolean isRunning = false;
-
-	//The font size
-	int fontSize = 18;
 
 	//The path of the most recently opened file
 	//Default to execution path
@@ -109,26 +83,31 @@ public class MainWindow extends JFrame{
 	//Code line counter
 	TextLineNumber codeLineNumber;
 
+	//A reference to the processing logic
+	private ProcessingLogic logic;
+	
+	public void start(){
 
-	//Execution highlighter
-	HighlightPainter linePainter = new DefaultHighlighter.DefaultHighlightPainter( Color.gray );
-
-	MainWindow() throws ClassNotFoundException, InstantiationException, IllegalAccessException, UnsupportedLookAndFeelException{
-		super();
-
+		//Get the processing logic reference
+		logic = primary.processingLogic;
+		
 		//Font
 		Charset.forName( "UTF-8" );
-		Font font = new Font( "Consolas", Font.PLAIN, fontSize );
+		Font font = new Font( "Consolas", Font.PLAIN, Config.fontSize );
 
 		//Main icon
-		ImageIcon img = new ImageIcon( iconPath + "icon.png" );
+		ImageIcon img = getImageIcon( "icon.png" );
 		this.setIconImage( img.getImage() );
 
 		//Make this look good
-		UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
+		try {
+			UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e1) {
+			e1.printStackTrace();
+		}
 
 		//Main window properties
-		this.setTitle( titleBase );
+		this.setTitle( Config.titleBase );
 		this.setSize( new Dimension( 500, 750 ) );
 		this.setMinimumSize( new Dimension( 500, 500 ) );
 		this.setLocationByPlatform( true );
@@ -271,9 +250,9 @@ public class MainWindow extends JFrame{
 		//Registers
 		JPanel registersPanel = new JPanel();
 		registersPanel.setLayout( new BoxLayout( registersPanel, BoxLayout.X_AXIS ) );
-		registersPanel.setPreferredSize( new Dimension( 50 * registerCount, 50 ) );
+		registersPanel.setPreferredSize( new Dimension( 50 * Config.registerCount, 50 ) );
 
-		for (int i = 0; i < registerCount; i++) {
+		for (int i = 0; i < Config.registerCount; i++) {
 
 			//The panel to contain the register
 			JPanel register = new JPanel();
@@ -330,7 +309,7 @@ public class MainWindow extends JFrame{
 		this.add( topSplitPane, BorderLayout.CENTER );
 
 		//New button
-		ImageIcon newIcon = new ImageIcon( iconPath + "new.png" );
+		ImageIcon newIcon = getImageIcon( "new.png" );
 		newButton = new JButton( newIcon );
 		newButton.setFocusable( false );
 		newButton.setToolTipText( "New file" );
@@ -361,7 +340,7 @@ public class MainWindow extends JFrame{
 		});
 
 		//Open button
-		ImageIcon openIcon = new ImageIcon( iconPath + "open.png" );
+		ImageIcon openIcon = getImageIcon( "open.png" );
 		openButton = new JButton( openIcon );
 		openButton.setFocusable( false );
 		openButton.setToolTipText( "Open file" );
@@ -372,7 +351,7 @@ public class MainWindow extends JFrame{
 
 				//Have them select a new file
 				JFileChooser fileChooser = new JFileChooser();
-				fileChooser.setFileFilter( new FileNameExtensionFilter( "A100 Files", fileExtension )  );
+				fileChooser.setFileFilter( new FileNameExtensionFilter( "A100 Files", Config.fileExtension )  );
 				fileChooser.setCurrentDirectory( currentFile ); 
 
 				//Get their response
@@ -412,7 +391,7 @@ public class MainWindow extends JFrame{
 		});
 
 		//Save button
-		ImageIcon saveIcon = new ImageIcon( iconPath + "save.png" );
+		ImageIcon saveIcon = getImageIcon( "save.png" );
 		saveButton = new JButton( saveIcon );
 		saveButton.setFocusable( false );
 		saveButton.setToolTipText( "Save file" );
@@ -426,7 +405,7 @@ public class MainWindow extends JFrame{
 		});
 
 		//Step button
-		ImageIcon stepIcon = new ImageIcon( iconPath + "step.png" );
+		ImageIcon stepIcon = getImageIcon( "step.png" );
 		stepButton = new JButton( stepIcon );
 		stepButton.setFocusable( false );
 		stepButton.setEnabled( false );
@@ -435,14 +414,14 @@ public class MainWindow extends JFrame{
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				step();
+				logic.step();
 			}
 
 		});
 
 
 		//Fast forward button
-		ImageIcon fastForwardIcon = new ImageIcon( iconPath + "fastforward.png" );
+		ImageIcon fastForwardIcon = getImageIcon( "fastforward.png" );
 		fastForwardButton = new JButton( fastForwardIcon );
 		fastForwardButton.setFocusable( false );
 		fastForwardButton.setEnabled( false );
@@ -453,20 +432,15 @@ public class MainWindow extends JFrame{
 			public void actionPerformed(ActionEvent arg0) {
 
 				
-				//As long as there are steps to take, step
-				while( hasNextLine() ) {
-					step();
-				}
-				
-				step();
+				logic.fastForward();
 
 			}
 
 		});
 
 		//Run/Stop button
-		runIcon = new ImageIcon( iconPath + "run.png" );
-		stopIcon = new ImageIcon( iconPath + "stop.png" );
+		runIcon = getImageIcon( "run.png" );
+		stopIcon = getImageIcon( "stop.png" );
 		runStopButton = new JButton( runIcon );
 		runStopButton.setFocusable( false );
 		runStopButton.setToolTipText( "Start running" );
@@ -525,7 +499,7 @@ public class MainWindow extends JFrame{
 	public void error( String str ) {
 
 		//Print the error
-		print( "Line #" + ( programCounter + 1 ) + ": " + str );
+		print( "Line #" + ( logic.programCounter + 1 ) + ": " + str );
 
 		//Halt
 		switchToEditMode();
@@ -577,10 +551,10 @@ public class MainWindow extends JFrame{
 		clearConsole();
 
 		//Clear the registers
-		clearRegisters();
+		logic.clearRegisters();
 
 		//Reset the program counter
-		programCounter = 0;
+		logic.programCounter = 0;
 
 		//Disable editing items
 		saveButton.setEnabled( false );
@@ -604,13 +578,6 @@ public class MainWindow extends JFrame{
 		codeLineNumber.repaint();
 
 		isRunning = true;
-
-	}
-
-	//Returns whether or not there is a next line available for execution
-	public boolean hasNextLine() {
-
-		return programCounter < codeTextArea.getLineCount();
 
 	}
 
@@ -638,7 +605,7 @@ public class MainWindow extends JFrame{
 	public void showSaveFileDialog() {
 
 		JFileChooser fileChooser = new JFileChooser();
-		fileChooser.setFileFilter( new FileNameExtensionFilter( "A100 Files", fileExtension )  );
+		fileChooser.setFileFilter( new FileNameExtensionFilter( "A100 Files", Config.fileExtension )  );
 		fileChooser.setCurrentDirectory( currentFile ); 
 
 		//Get their response
@@ -650,9 +617,9 @@ public class MainWindow extends JFrame{
 			File saveFile = fileChooser.getSelectedFile();
 
 			//If it doesn't end in the appropriate extension, add it on
-			if( !saveFile.getName().toLowerCase().endsWith( "." + fileExtension.toLowerCase() ) ) {
+			if( !saveFile.getName().toLowerCase().endsWith( "." + Config.fileExtension.toLowerCase() ) ) {
 
-				saveFile = new File( saveFile.getAbsolutePath() + "." + fileExtension );
+				saveFile = new File( saveFile.getAbsolutePath() + "." + Config.fileExtension );
 
 			}
 
@@ -755,329 +722,67 @@ public class MainWindow extends JFrame{
 		//Empty files have no changes
 		setFileHasChanged( false );
 	}
+	
+	//Returns an icon image for a given file name
+	public ImageIcon getImageIcon( String fileName ) {
+		return new ImageIcon( Config.iconPath + fileName );
+	}
 
 	//Updates the title of the window
 	public void updateTitle() {
 		if( isFileOpen() ) {
-			this.setTitle( titleBase + " - " + openFile );
+			this.setTitle( Config.titleBase + " - " + openFile );
 		}else {
-			this.setTitle( titleBase + " - Untitled" );
+			this.setTitle( Config.titleBase + " - Untitled" );
 		}
 	}
 
 	//Updates the file having changed
 	public void setFileHasChanged( boolean newValue ) {
-
 		fileHasChanged = newValue;
-
 	}
-
-	//Returns whether the passed string references a valid register
-	public boolean isRegister( String argument ) {
-
-		//No R means no register
-		if( !argument.startsWith( "R" ) ){
-			return false;
-		}
-
-		//Get rid of the R so we can convert to a number
-		argument = argument.replace( "R", "" );
-
-		int registerNumber;
-
-		//Convert to a register number
-		try {
-			registerNumber = Integer.parseInt( argument );
-		} catch( Exception e ) {
-			//If we can't convert the remaining text to a number, this was not a register
-			return false;
-		}
-
-		//But also if the register it references is outside the register count that's not good
-		if( registerNumber >= registerCount || registerNumber < 0 ) {
-			return false;
-		}
-
-		//Only now can we say it's probably a register (probably)
-		return true;
+	
+	//Gets and returns the line count
+	public int getLineCount() {
+		return codeTextArea.getLineCount();
 	}
-
-	//Parses the register number out of a register string
-	public int getRegisterNumber( String argument ) {
-
-		//Remove the R
-		argument = argument.replace( "R" ,  "" );
-
-		//Trim the result
-		argument = argument.trim();
-
-		//Convert to an int
-		int output = Integer.parseInt( argument );
-
-		//Error checking
-
-		//Make sure it's a valid register
-		if( output >= registerCount || output < 0 ) {
-			error( Strings.InvalidRegisterReference );
-		}
-
-		return output;
-	}
-
-	//Stores value A in register B
-	public void storeValueInRegister( int A, int B ) {
-
-		//Store the value
-		registers[ B ] = A;
-
-		//Update the UI
-		registerLabels[ B ].setText( String.valueOf( A  ) );
-
-	}
-
-	//Clears the registers
-	public void clearRegisters() {
-		for (int i = 0; i < registerCount; i++) {
-			storeValueInRegister( 0, i );
-		}
-	}
-
-	//Converts an argument string into a literal int
-	public int getLiteral( String argument ) {
-		int output = 0;
-
-		try {
-			output = Integer.parseInt( argument );
-		} catch ( Exception e ) {
-			//If this isn't a register, and it isn't a literal number, we don't know what it is then
-			error( Strings.UnrecognizedDataType );
-		}
-
-		//Check the output for out of bounds error
-		if( output > maxNumberRange || output < minNumberRange ) {
-			error( Strings.NumberOutOfBounds );
-		}
-
-		return output;
-	}
-
-	//Performs the MOV command
-	public void MOV( String A, String B ) {
-
-		int valueA = -1;
-		int valueB = -1;
-
-		//If A is not a register, we need to get the value from what A references
-		if( !isRegister( A ) ) {
-
-			//Convert A to an integer
-			valueA = getLiteral( A );
-
-			//Now AInt contains the literal value of A
-		}else {
-			//If A is a register, we need to go get it's value
-
-			//Get the register number
-			int ARegisterNumber = getRegisterNumber( A );
-
-			//Get A's register's value
-			valueA = registers[ ARegisterNumber ];
-		}
-
-		//Get B's register number
-		valueB = getRegisterNumber( B );
-
-		//Error checking
-
-		//Check that B is a register
-		if( !isRegister( B ) ) {
-			error( Strings.ArgumentIsNotRegister );
-		}
-
-		//If there are no errors, store AValue in the register corresponding to BValue
-		storeValueInRegister( valueA, valueB );
-
-	}
-
-	public void ADD( String A, String B, String C ) {
-
-		//Stores the register number for C
-		int registerC = -1;
-
-		//Process output register C
-		if( !isRegister( C ) ) {
-			error( Strings.ArgumentIsNotRegister );
-			return;
-		}else {
-			registerC = getRegisterNumber( C );
-		}
-
-		//Values of A and B
-		int valueA = -1;
-		int valueB = -1;
-
-		//Get values for A
-		if( isRegister( A ) ) {
-			int registerA = getRegisterNumber( A );
-			valueA = registers[ registerA ];
-		}else {
-			//Otherwise it's a literal
-			valueA = getLiteral( A );
-		}
-
-		//Get values for B
-		if( isRegister( B ) ) {
-			int registerB = getRegisterNumber( B );
-			valueB = registers[ registerB ];
-		}else {
-			//Otherwise it's a literal
-			valueB = getLiteral( B );
-		}
-
-		//Do the addition
-		int result = valueA + valueB;
-
-		if( result > maxNumberRange || result < minNumberRange ) {
-			error( Strings.NumberOutOfBounds );
-		}
-
-		//Store the outcome
-		storeValueInRegister( result, registerC );
-
-	}
-
-	public void SUB( String A, String B, String C ) {
-
-		//Stores the register number for C
-		int registerC = -1;
-
-		//Process output register C
-		if( !isRegister( C ) ) {
-			error( Strings.ArgumentIsNotRegister );
-			return;
-		}else {
-			registerC = getRegisterNumber( C );
-		}
-
-		//Values of A and B
-		int valueA = -1;
-		int valueB = -1;
-
-		//Get values for A
-		if( isRegister( A ) ) {
-			int registerA = getRegisterNumber( A );
-			valueA = registers[ registerA ];
-		}else {
-			//Otherwise it's a literal
-			valueA = getLiteral( A );
-		}
-
-		//Get values for B
-		if( isRegister( B ) ) {
-			int registerB = getRegisterNumber( B );
-			valueB = registers[ registerB ];
-		}else {
-			//Otherwise it's a literal
-			valueB = getLiteral( B );
-		}
-
-		//Do the addition
-		int result = valueA - valueB;
+	
+	//Highlights a given line
+	public void highlightLine( int lineNumber ) {
 		
-		if( result > maxNumberRange || result < minNumberRange ) {
-			error( Strings.NumberOutOfBounds );
+		//Only if we have a previous line
+		if( previousLineHighlighter != null ) {
+			//Remove highlight from the previous line
+			codeTextArea.getHighlighter().removeHighlight( previousLineHighlighter );
 		}
 
-		//Store the outcome
-		storeValueInRegister( result, registerC );
-
+		try {
+			int lineStart = codeTextArea.getLineStartOffset( lineNumber );
+			int lineEnd = codeTextArea.getLineEndOffset( lineNumber );
+			previousLineHighlighter = codeTextArea.getHighlighter().addHighlight( lineStart, lineEnd, new DefaultHighlighter.DefaultHighlightPainter( Config.highlightedColor ) );
+		} catch (BadLocationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
-
-	//Performs the next step in execution
-	//Arguably this is the entire program
-	public void step() {
-
-		if( hasNextLine() ) {
-			//Only if we have a previous line
-			if( previousLineHighlighter != null ) {
-				//Remove highlight from the previous line
-				codeTextArea.getHighlighter().removeHighlight( previousLineHighlighter );
-			}
-
-			try {
-			
-			int lineStart = codeTextArea.getLineStartOffset( programCounter );
-			int lineEnd = codeTextArea.getLineEndOffset( programCounter );
-
-			//Highlight the next line
-			previousLineHighlighter = codeTextArea.getHighlighter().addHighlight( lineStart, lineEnd, new DefaultHighlighter.DefaultHighlightPainter( Color.LIGHT_GRAY ) );
-
-			String line = codeTextArea.getText( lineStart ,  lineEnd - lineStart );
-
-			//Set to true to skip this line
-			boolean skip = false;
-
-			//Check if this is a comment line or an empty line
-			if( line.startsWith( "#" ) || line.trim().length() == 0 ) {
-				//ignore it
-				skip = true;
-			}
-
-			//If we don't skip, continue processing
-			if( !skip ) {
-				line = line.toUpperCase();
-
-				//Break the line apart by spaces as those are our delimiter
-				String[] splitLine = line.split( " " );
-
-				//Trim everything to avoid errors later
-				for (int i = 0; i < splitLine.length; i++) {
-					splitLine[ i ] = splitLine[ i ].trim();
-				}
-
-				//We're going to use a switch case for this
-				switch( splitLine[ 0 ] ) {
-				case "MOV":
-
-					if( splitLine.length != 3 ) {
-						error( Strings.WrongNumberOfArguments );
-					}
-
-					MOV( splitLine[ 1 ], splitLine[ 2 ] );
-					break;
-				case "ADD":
-
-					if( splitLine.length != 4 ) {
-						error( Strings.WrongNumberOfArguments );
-					}
-
-					ADD( splitLine[ 1 ], splitLine[ 2 ], splitLine[ 3 ] );
-					break;
-				case "SUB":
-
-					if( splitLine.length != 4 ) {
-						error( Strings.WrongNumberOfArguments );
-					}
-
-					SUB( splitLine[ 1 ], splitLine[ 2 ], splitLine[ 3 ] );
-					break;
-				}
-
-			}
-
-			programCounter++;
-			} catch( BadLocationException E ) {
-				print( "Bad location error.  This should never happen" );
-			}
-		}else {
-			//Stop executing if we have run out of stuff to execute
-
-			print( "Execution finished" );
-
-			switchToEditMode();
-
+	
+	//Returns the text from a given line
+	public String getLine( int lineNumber ) {
+		
+		String line = "";
+		
+		try {
+			int lineStart = codeTextArea.getLineStartOffset( lineNumber );
+			int lineEnd = codeTextArea.getLineEndOffset( lineNumber );
+			line = codeTextArea.getText( lineStart ,  lineEnd - lineStart );
+		} catch (BadLocationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-
+		
+		return line;
+		
 	}
 
 }
