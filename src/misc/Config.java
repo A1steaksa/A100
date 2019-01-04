@@ -31,11 +31,7 @@ public class Config {
 	public static int minNumberRange = -9999;
 	public static int maxNumberRange = 9999;
 	
-	//The number of registers
-	public static int registerCount = 10;
-	
-	
-	
-	
+	//The number of non-special registers
+	public static int registerCount = 7;
 
 }

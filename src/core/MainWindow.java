@@ -15,6 +15,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 import javax.swing.BorderFactory;
@@ -56,7 +58,7 @@ public class MainWindow extends JFrame{
 	Object previousLineHighlighter;
 
 	//Stores the labels associated with the registers
-	JLabel[] registerLabels = new JLabel[ Config.registerCount ];
+	Map<String, JLabel> registerLabels = new HashMap<String, JLabel>();
 
 	//Keeps track of whether or not the file has been changed
 	boolean fileHasChanged = false;
@@ -69,6 +71,10 @@ public class MainWindow extends JFrame{
 	File currentFile = new File( System.getProperty("user.dir") );
 
 	//UI Variables
+	
+	//Font
+	Font font;
+	
 	//Buttons
 	JButton saveButton;
 	JButton newButton;
@@ -88,6 +94,9 @@ public class MainWindow extends JFrame{
 	//Code line counter
 	TextLineNumber codeLineNumber;
 
+	//Panel of registers
+	JPanel registersPanel;
+	
 	//A reference to the processing logic
 	private ProcessingLogic logic;
 	
@@ -98,7 +107,7 @@ public class MainWindow extends JFrame{
 		
 		//Font
 		Charset.forName( "UTF-8" );
-		Font font = new Font( "Consolas", Font.PLAIN, Config.fontSize );
+		font = new Font( "Consolas", Font.PLAIN, Config.fontSize );
 
 		//Main icon
 		ImageIcon img = getImageIcon( "icon.png" );
@@ -256,38 +265,17 @@ public class MainWindow extends JFrame{
 		codeScrollPane.setRowHeaderView( codeLineNumber );
 
 		//Registers
-		JPanel registersPanel = new JPanel();
+		registersPanel = new JPanel();
 		registersPanel.setLayout( new BoxLayout( registersPanel, BoxLayout.X_AXIS ) );
 		registersPanel.setPreferredSize( new Dimension( 50 * Config.registerCount, 50 ) );
 
+		//Add special registers
+		//Program counter
+		addRegister( "PC", 0 );
+		
+		//Add regular registers
 		for (int i = 0; i < Config.registerCount; i++) {
-
-			//The panel to contain the register
-			JPanel register = new JPanel();
-			register.setLayout( new BorderLayout() );
-			register.setMinimumSize( new Dimension( 50, -1 ) );
-			register.setPreferredSize( new Dimension( 50, -1 ) );
-
-			//Add a border
-			register.setBorder(BorderFactory.createLineBorder(Color.black));
-
-			//The label to hold the register name
-			JLabel topLabel = new JLabel( "R" + i );
-			topLabel.setHorizontalAlignment( JLabel.CENTER );
-			topLabel.setFont( font );
-			register.add( topLabel, BorderLayout.NORTH );
-
-			//The label to hold the register value
-			JLabel bottomLabel = new JLabel( "0" );
-			bottomLabel.setHorizontalAlignment( JLabel.CENTER );
-			bottomLabel.setFont( font );
-			register.add( bottomLabel, BorderLayout.SOUTH );
-
-			//Add the bottom register to the registerLabels list so it can be edited later
-			registerLabels[ i ] = bottomLabel;
-
-			//Add this register to the list
-			registersPanel.add( register );
+			addRegister( "R" + i, 0 );
 		}
 
 
@@ -465,8 +453,10 @@ public class MainWindow extends JFrame{
 				}else {
 
 					//Otherwise, switch to execution mode
-
 					switchToExecutionMode();
+					
+					//Highlight the first line
+					highlightLine( 0 );
 
 				}
 
@@ -507,7 +497,7 @@ public class MainWindow extends JFrame{
 	public void error( String str ) {
 
 		//Print the error
-		print( "Line #" + ( logic.programCounter + 1 ) + ": " + str );
+		print( "Line #" + ( logic.getRegisterValue( "PC" ) + 1 ) + ": " + str );
 
 		//Halt
 		switchToEditMode();
@@ -557,13 +547,10 @@ public class MainWindow extends JFrame{
 
 		//Clear the console
 		clearConsole();
-
-		//Clear the registers
-		logic.clearRegisters();
-
-		//Reset the program counter
-		logic.programCounter = 0;
-
+		
+		//Reset the logic
+		logic.reset();
+		
 		//Disable editing items
 		saveButton.setEnabled( false );
 		newButton.setEnabled( false );
@@ -589,6 +576,47 @@ public class MainWindow extends JFrame{
 
 	}
 
+	//Adds a register to the system
+	public void addRegister( String name, int value ) {
+		
+		//The panel to contain the register
+		JPanel register = new JPanel();
+		register.setLayout( new BorderLayout() );
+		register.setMinimumSize( new Dimension( 50, -1 ) );
+		register.setPreferredSize( new Dimension( 50, -1 ) );
+
+		//Add a border
+		register.setBorder(BorderFactory.createLineBorder(Color.black));
+
+		//The label to hold the register name
+		JLabel topLabel = new JLabel( name );
+		topLabel.setHorizontalAlignment( JLabel.CENTER );
+		topLabel.setFont( font );
+		register.add( topLabel, BorderLayout.NORTH );
+
+		//The label to hold the register value
+		JLabel bottomLabel = new JLabel( String.valueOf( value ) );
+		bottomLabel.setHorizontalAlignment( JLabel.CENTER );
+		bottomLabel.setFont( font );
+		register.add( bottomLabel, BorderLayout.SOUTH );
+		
+		//Add the bottom register to the registerLabels map so it can be edited later
+		registerLabels.put( name, bottomLabel );
+
+		//Add this register to the list
+		registersPanel.add( register );
+		
+		//Initialize this register in logic as well
+		logic.addRegister( name, value );
+		
+	}
+	
+	public void setRegisterValue( String name, int value ) {
+		
+		registerLabels.get( name ).setText( String.valueOf( value ) );
+		
+	}
+	
 	//Returns whether or not a file is open
 	public boolean isFileOpen() {
 		return !openFile.equals( "" );

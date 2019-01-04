@@ -1,24 +1,75 @@
 package core;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import javax.swing.JLabel;
+
 import misc.Config;
 import misc.Strings;
 
 public class ProcessingLogic {
 
+	//A flag that stops the next step from executing when set
+	public boolean halt = false;
+	
 	//A reference to the main window
 	private MainWindow window;
 
-	//Program counter
-	public int programCounter = 0;
-
 	//The actual registers themselves
-	public int[] registers = new int[ Config.registerCount ];
+	public Map<String, Integer> registers = new HashMap<String, Integer>();
 
 	//Called when all main sections are created in primary
 	public void start() {
 
 		//Get the main window reference
 		window = primary.mainWindow;
+
+	}
+
+	//Adds a register to the logic system
+	//We do this directly to avoid invalid register issues
+	public void addRegister( String name, int value ) {
+		registers.put( name, value );
+	}
+
+	//Places a value into a register and throws a halting error if that register does not exist
+	public void setRegisterValue( String name, int value ) {
+
+		//Get the value of the register to check if it exists
+		//Registers are initialized to some value (usually 0) so if it's null then we know it's invalid
+		if( registers.get( name ) == null ) {
+			error( Strings.InvalidRegisterReference );
+		}
 		
+		//Check for out of bounds errors
+		if( value > Config.maxNumberRange || value < Config.minNumberRange ) {
+			error( Strings.NumberOutOfBounds );
+		}
+
+		//Put the value into the register
+		registers.put( name,  value );
+
+		//Update the UI
+		window.setRegisterValue( name, value );
+
+	}
+
+	//Returns the value of a register and throws a halting error if that register does not exist
+	public int getRegisterValue( String name ) {
+
+
+		Integer registerValue = registers.get( name );
+
+		//Registers are initialized to some value (usually 0) so if it's null then we know it's invalid
+		if( registerValue == null ) {
+			error( Strings.InvalidRegisterReference );
+		}
+
+		//Return the cleared value
+		return registerValue;
+
 	}
 
 	//A wrapper for print
@@ -29,76 +80,38 @@ public class ProcessingLogic {
 	//A wrapper for error
 	private void error( String str ) {
 		window.error( str );
+		halt = true;
 	}
-
-	//Stores value A in register B
-	public void storeValueInRegister( int A, int B ) {
-
-		//Store the value
-		registers[ B ] = A;
-
-		//Update the UI
-		window.registerLabels[ B ].setText( String.valueOf( A  ) );
-
+	
+	//Resets logic to run again
+	public void reset() {
+		
+		//Clear registers
+		clearRegisters();
+		
+		//Reset halt
+		halt = false;
+		
 	}
 
 	//Clears the registers
 	public void clearRegisters() {
-		for (int i = 0; i < Config.registerCount; i++) {
-			storeValueInRegister( 0, i );
+		for (Entry<String, Integer> entry : registers.entrySet()) {
+			setRegisterValue( entry.getKey(), 0 );
 		}
 	}
 
 	//Returns whether the passed string references a valid register
-	public boolean isRegister( String argument ) {
+	public boolean isRegister( String name ) {
 
-		//No R means it isn't a register
-		if( !argument.startsWith( "R" ) ){
+		//If it exists in the registers hashmap, it's a register
+		if( registers.get( name ) == null ) {
 			return false;
 		}
 
-		//Get rid of the R so we can convert to a number
-		argument = argument.replace( "R", "" );
-
-		int registerNumber;
-
-		//Convert to a register number
-		try {
-			registerNumber = Integer.parseInt( argument );
-		} catch( Exception e ) {
-			//If we can't convert the remaining text to a number, this was not a register
-			return false;
-		}
-
-		//But also if the register it references is outside the register count that's not good
-		if( registerNumber >= Config.registerCount || registerNumber < 0 ) {
-			return false;
-		}
-
-		//Only now can we say it's probably a register (probably)
+		//If it does exist, it's a register
 		return true;
-	}
 
-	//Parses the register number out of a register string
-	public int getRegisterNumber( String argument ) {
-
-		//Remove the R
-		argument = argument.replace( "R" ,  "" );
-
-		//Trim the result
-		argument = argument.trim();
-
-		//Convert to an int
-		int output = Integer.parseInt( argument );
-
-		//Error checking
-
-		//Make sure it's a valid register
-		if( output >= Config.registerCount || output < 0 ) {
-			error( Strings.InvalidRegisterReference );
-		}
-
-		return output;
 	}
 
 	//Converts an argument string into a literal int
@@ -122,100 +135,100 @@ public class ProcessingLogic {
 
 	//Returns whether or not there is a next line available for execution
 	public boolean hasNextLine() {
-
-		return programCounter < window.getLineCount();
-
+		
+		//Halt if we need to
+		if( halt ) {
+			return false;
+		}
+		
+		//Checks if the program counter is below the line count
+		return getRegisterValue( "PC" ) < window.getLineCount();
 	}
 
 	//Performs the next step in execution
 	//Arguably this is the entire program
 	public void step() {
 
-		if( hasNextLine() ) {
+		//Get the current line
+		String line = window.getLine( getRegisterValue( "PC" ) );
 
-			//Highlight the current line
-			window.highlightLine( programCounter );
-			
-			//Get the current line
-			String line = window.getLine( programCounter );
+		//Set to true to skip this line
+		boolean skip = false;
 
-			//Set to true to skip this line
-			boolean skip = false;
+		//Check if this is a comment line or an empty line
+		if( line.startsWith( "#" ) || line.trim().length() == 0 ) {
+			//ignore it
+			skip = true;
+		}
 
-			//Check if this is a comment line or an empty line
-			if( line.startsWith( "#" ) || line.trim().length() == 0 ) {
-				//ignore it
-				skip = true;
+		//If we don't skip, continue processing
+		if( !skip ) {
+			line = line.toUpperCase();
+
+			//Break the line apart by spaces as those are our delimiter
+			String[] splitLine = line.split( " " );
+
+			//Trim everything to avoid errors later
+			for (int i = 0; i < splitLine.length; i++) {
+				splitLine[ i ] = splitLine[ i ].trim();
 			}
 
-			//If we don't skip, continue processing
-			if( !skip ) {
-				line = line.toUpperCase();
+			//We're going to use a switch case for this
+			switch( splitLine[ 0 ] ) {
+			case "MOV":
 
-				//Break the line apart by spaces as those are our delimiter
-				String[] splitLine = line.split( " " );
-
-				//Trim everything to avoid errors later
-				for (int i = 0; i < splitLine.length; i++) {
-					splitLine[ i ] = splitLine[ i ].trim();
+				if( splitLine.length != 3 ) {
+					error( Strings.WrongNumberOfArguments );
 				}
 
-				//We're going to use a switch case for this
-				switch( splitLine[ 0 ] ) {
-				case "MOV":
+				MOV( splitLine[ 1 ], splitLine[ 2 ] );
+				break;
+			case "ADD":
 
-					if( splitLine.length != 3 ) {
-						error( Strings.WrongNumberOfArguments );
-					}
-
-					MOV( splitLine[ 1 ], splitLine[ 2 ] );
-					break;
-				case "ADD":
-
-					if( splitLine.length != 4 ) {
-						error( Strings.WrongNumberOfArguments );
-					}
-
-					ADD( splitLine[ 1 ], splitLine[ 2 ], splitLine[ 3 ] );
-					break;
-				case "SUB":
-
-					if( splitLine.length != 4 ) {
-						error( Strings.WrongNumberOfArguments );
-					}
-
-					SUB( splitLine[ 1 ], splitLine[ 2 ], splitLine[ 3 ] );
-					break;
-					
-				default:
-					error( Strings.UnrecognizedOpcode );
+				if( splitLine.length != 4 ) {
+					error( Strings.WrongNumberOfArguments );
 				}
 
+				ADD( splitLine[ 1 ], splitLine[ 2 ], splitLine[ 3 ] );
+				break;
+			case "SUB":
+
+				if( splitLine.length != 4 ) {
+					error( Strings.WrongNumberOfArguments );
+				}
+
+				SUB( splitLine[ 1 ], splitLine[ 2 ], splitLine[ 3 ] );
+				break;
+
+			default:
+				error( Strings.UnrecognizedOpcode );
 			}
-
-			programCounter++;
-
-		}else {
-			//Stop executing if we have run out of stuff to execute
-
-			print( "Execution finished" );
-
-			window.switchToEditMode();
 
 		}
 
+		//Increment the program counter
+		setRegisterValue( "PC",  getRegisterValue( "PC" ) + 1 );
+
+		//Check if we have reached the end of the code
+		if( !hasNextLine() ) {
+			print( "Execution finished" );
+
+			window.switchToEditMode();
+		}else {
+			//Highlight the new line
+			window.highlightLine( getRegisterValue( "PC" ) );
+		}
+
 	}
-	
+
 	//Steps until there are no more steps to take
 	public void fastForward() {
-		
+
 		//As long as there are steps to take, step
 		while( hasNextLine() ) {
 			step();
 		}
 		
-		//Having come to the end of the available steps, take another one to end execution
-		step();
 	}
 
 
@@ -227,27 +240,17 @@ public class ProcessingLogic {
 	public void MOV( String A, String B ) {
 
 		int valueA = -1;
-		int valueB = -1;
 
 		//If A is not a register, we need to get the value from what A references
 		if( !isRegister( A ) ) {
-
 			//Convert A to an integer
 			valueA = getLiteral( A );
-
-			//Now AInt contains the literal value of A
 		}else {
-			//If A is a register, we need to go get it's value
-
-			//Get the register number
-			int ARegisterNumber = getRegisterNumber( A );
+			//Otherwise we can just get it directly
 
 			//Get A's register's value
-			valueA = registers[ ARegisterNumber ];
+			valueA = getRegisterValue( A );
 		}
-
-		//Get B's register number
-		valueB = getRegisterNumber( B );
 
 		//Error checking
 
@@ -257,21 +260,16 @@ public class ProcessingLogic {
 		}
 
 		//If there are no errors, store AValue in the register corresponding to BValue
-		storeValueInRegister( valueA, valueB );
+		setRegisterValue( B, valueA );
 
 	}
 
 	public void ADD( String A, String B, String C ) {
 
-		//Stores the register number for C
-		int registerC = -1;
-
 		//Process output register C
 		if( !isRegister( C ) ) {
 			error( Strings.ArgumentIsNotRegister );
 			return;
-		}else {
-			registerC = getRegisterNumber( C );
 		}
 
 		//Values of A and B
@@ -280,8 +278,7 @@ public class ProcessingLogic {
 
 		//Get values for A
 		if( isRegister( A ) ) {
-			int registerA = getRegisterNumber( A );
-			valueA = registers[ registerA ];
+			valueA = getRegisterValue( A );
 		}else {
 			//Otherwise it's a literal
 			valueA = getLiteral( A );
@@ -289,8 +286,7 @@ public class ProcessingLogic {
 
 		//Get values for B
 		if( isRegister( B ) ) {
-			int registerB = getRegisterNumber( B );
-			valueB = registers[ registerB ];
+			valueB = getRegisterValue( B );
 		}else {
 			//Otherwise it's a literal
 			valueB = getLiteral( B );
@@ -299,26 +295,17 @@ public class ProcessingLogic {
 		//Do the addition
 		int result = valueA + valueB;
 
-		if( result > Config.maxNumberRange || result < Config.minNumberRange ) {
-			error( Strings.NumberOutOfBounds );
-		}
-
 		//Store the outcome
-		storeValueInRegister( result, registerC );
+		setRegisterValue( C, result );
 
 	}
 
 	public void SUB( String A, String B, String C ) {
 
-		//Stores the register number for C
-		int registerC = -1;
-
 		//Process output register C
 		if( !isRegister( C ) ) {
 			error( Strings.ArgumentIsNotRegister );
 			return;
-		}else {
-			registerC = getRegisterNumber( C );
 		}
 
 		//Values of A and B
@@ -327,8 +314,7 @@ public class ProcessingLogic {
 
 		//Get values for A
 		if( isRegister( A ) ) {
-			int registerA = getRegisterNumber( A );
-			valueA = registers[ registerA ];
+			valueA = getRegisterValue( A );
 		}else {
 			//Otherwise it's a literal
 			valueA = getLiteral( A );
@@ -336,22 +322,17 @@ public class ProcessingLogic {
 
 		//Get values for B
 		if( isRegister( B ) ) {
-			int registerB = getRegisterNumber( B );
-			valueB = registers[ registerB ];
+			valueB = getRegisterValue( B );
 		}else {
 			//Otherwise it's a literal
 			valueB = getLiteral( B );
 		}
 
-		//Do the addition
+		//Do the subtraction
 		int result = valueA - valueB;
 
-		if( result > Config.maxNumberRange || result < Config.minNumberRange ) {
-			error( Strings.NumberOutOfBounds );
-		}
-
 		//Store the outcome
-		storeValueInRegister( result, registerC );
+		setRegisterValue( C, result );
 
 	}
 
