@@ -21,13 +21,13 @@ In A1, the correct syntax for a command is the opcode followed by space
 delimited arguments as appropriate for the opcode used.
 
 For example:
-
-\<OPCODE\> \<ARGUMENT1\> \<ARGUMENT2\>
-
+```
+<OPCODE> <ARGUMENT1> <ARGUMENT2>
+```
 >   Is the syntax for a 2-argument call.
-
-\<OPCODE\> \<ARGUMENT1\>
-
+```
+<OPCODE> <ARGUMENT1>
+```
 >   Is the syntax for a single argument call.
 
 ### Correct Case
@@ -40,26 +40,26 @@ Normal registers are 0 indexed and referenced via the prefix R followed by the
 suffix of their number.
 
 For example:
-
+```
 R5
-
+```
 >   References register 5, or the 6th register.
-
+```
 R22
-
+```
 >   References the theoretical double-digit register 22 or the 23rd register.
 
 Special registers, such as the program counter, are referenced by their
 shorthand name.
 
 For example:
-
+```
 PC
-
+```
 >   References the program counter register.
-
+```
 MH
-
+```
 >   References the main memory read/write head position.
 
 ### Comments
