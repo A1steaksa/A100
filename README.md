@@ -25,11 +25,11 @@ For example:
 
 \<OPCODE\> \<ARGUMENT1\> \<ARGUMENT2\>
 
-Is the syntax for a 2-argument call.
+>   Is the syntax for a 2-argument call.
 
 \<OPCODE\> \<ARGUMENT1\>
 
-Is the syntax for a single argument call.
+>   Is the syntax for a single argument call.
 
 Correct Case
 ------------
@@ -46,11 +46,11 @@ For example:
 
 R5
 
-References register 5, or the 6th register.
+>   References register 5, or the 6th register.
 
 R22
 
-References the theoretical double-digit register 22 or the 23rd register.
+>   References the theoretical double-digit register 22 or the 23rd register.
 
 Special registers, such as the program counter, are referenced by their
 shorthand name.
@@ -59,11 +59,11 @@ For example:
 
 PC
 
-References the program counter register.
+>   References the program counter register.
 
 MH
 
-References the main memory read/write head position.
+>   References the main memory read/write head position.
 
 Comments
 --------
@@ -117,11 +117,11 @@ For example:
 
 1.  MOV 1 R2
 
-Moves the literal number 1 into register 2.
+>   Moves the literal number 1 into register 2.
 
 1.  MOV R1 R4
 
-Moves the value from register 1 into register 4.
+>   Moves the value from register 1 into register 4.
 
 ADD \<A\> \<B\> \<C\>
 ---------------------
@@ -132,11 +132,11 @@ For example:
 
 1.  ADD 1 R1 R1
 
-Increments register 1 by 1.
+>   Increments register 1 by 1.
 
 1.  ADD R1 R2 R3
 
-Adds register 1 and register 2 together and stores the result in register 3.
+>   Adds register 1 and register 2 together and stores the result in register 3.
 
 SUB \<A\> \<B\> \<C\>
 ---------------------
@@ -147,11 +147,11 @@ For example:
 
 1.  SUB 1 2 R0
 
-Subtracts 2 from 1 and stores the resulting -1 in register 0.
+>   Subtracts 2 from 1 and stores the resulting -1 in register 0.
 
 1.  SUB R1 R2 R3
 
-Subtracts register 2 from register 1 and stores the result in register 3.
+>   Subtracts register 2 from register 1 and stores the result in register 3.
 
 BNE \<A\> \<B\> \<C\>
 ---------------------
