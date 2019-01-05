@@ -79,7 +79,7 @@ For example:
 Number Space
 ------------
 
-A1 uses a simplified integer space between -9,999 and 9,999. Storing any value
+A1 uses a simplified integer space in the range [-9,999, 9,999]. Storing any value
 above that will result in a halting error.
 
 Labels
