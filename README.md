@@ -5,7 +5,7 @@
 ### A Note on this Documentation
 
 When reading this documentation, keep in mind that unless otherwise specified,
-arguments can be literals, registers, or label names. If an argument must be one specifically, that will be specified in the explanation.
+arguments can be literals or registers. If an argument must be specifically a register, a label name, or a literal, that will be specified in the explanation.
 
 For example:
 ```
