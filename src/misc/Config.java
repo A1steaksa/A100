@@ -33,5 +33,8 @@ public class Config {
 	
 	//The number of non-special registers
 	public static int registerCount = 7;
+	
+	//The size of main memory
+	public static int mainMemoryLength = 10000;
 
 }

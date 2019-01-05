@@ -59,6 +59,9 @@ public class MainWindow extends JFrame{
 
 	//Stores the labels associated with the registers
 	Map<String, JLabel> registerLabels = new HashMap<String, JLabel>();
+	
+	//Stores the labels associated with main memory
+	JLabel[]  mainMemoryLabels = new JLabel[ Config.mainMemoryLength ];
 
 	//Keeps track of whether or not the file has been changed
 	boolean fileHasChanged = false;
@@ -96,6 +99,9 @@ public class MainWindow extends JFrame{
 
 	//Panel of registers
 	JPanel registersPanel;
+	
+	//Panel for main memory
+	JPanel mainMemoryPanel;
 	
 	//A reference to the processing logic
 	private ProcessingLogic logic;
@@ -278,10 +284,28 @@ public class MainWindow extends JFrame{
 			addRegister( "R" + i, 0 );
 		}
 
-
 		//Registers scroll pane
 		JScrollPane registersPanelScrollPane = new JScrollPane( registersPanel );
+		registersPanelScrollPane.setMinimumSize( new Dimension( Integer.MAX_VALUE, 50 ) );
+		registersPanelScrollPane.setMaximumSize( new Dimension( Integer.MAX_VALUE, 50 ) );
+		
+		//Main memory
+		mainMemoryPanel = new JPanel();
+		mainMemoryPanel.setLayout( new BoxLayout( mainMemoryPanel, BoxLayout.X_AXIS ) );
+		mainMemoryPanel.setPreferredSize( new Dimension( Config.mainMemoryLength * 75, 50 ) );
+		
+		//Add memory spaces
+		for (int i = 0; i < Config.mainMemoryLength; i++) {
+			addMainMemorySpace( i, 0 );
+		}
 
+		//Main memory scroll pane
+		JScrollPane mainMemoryPanelScrollPane = new JScrollPane( mainMemoryPanel );
+		mainMemoryPanelScrollPane.setMinimumSize( new Dimension( Integer.MAX_VALUE, 75 ) );
+		mainMemoryPanelScrollPane.setMaximumSize( new Dimension( Integer.MAX_VALUE, 75 ) );
+		mainMemoryPanelScrollPane.setPreferredSize( new Dimension( Integer.MAX_VALUE, 75 ) );
+		mainMemoryPanelScrollPane.setVerticalScrollBarPolicy( JScrollPane.VERTICAL_SCROLLBAR_NEVER );
+		
 		//Console
 		consoleTextArea = new JTextArea( 3, 10 );
 		consoleTextArea.setFont( font );
@@ -293,15 +317,16 @@ public class MainWindow extends JFrame{
 
 		//Panel for the console and registers
 		JPanel bottomPanel = new JPanel();
-		bottomPanel.setLayout( new BorderLayout() );
-		bottomPanel.add( registersPanelScrollPane, BorderLayout.NORTH );
-		bottomPanel.add( consoleScrollPane, BorderLayout.CENTER );
+		bottomPanel.setLayout( new BoxLayout( bottomPanel, BoxLayout.Y_AXIS ) );
+		bottomPanel.add( registersPanelScrollPane );
+		bottomPanel.add( mainMemoryPanelScrollPane );
+		bottomPanel.add( consoleScrollPane );
 
 		//Split pane to split code from the bottom pieces
 		JSplitPane topSplitPane = new JSplitPane( JSplitPane.VERTICAL_SPLIT );
 		topSplitPane.setTopComponent( codeScrollPane );
 		topSplitPane.setBottomComponent( bottomPanel );
-		topSplitPane.setDividerLocation( 500 );
+		topSplitPane.setDividerLocation( 350 );
 		this.add( topSplitPane, BorderLayout.CENTER );
 
 		//New button
@@ -469,7 +494,7 @@ public class MainWindow extends JFrame{
 		toolbar.add( newButton );
 		toolbar.add( openButton );
 		toolbar.add( saveButton );
-
+		
 		toolbar.addSeparator();
 
 		toolbar.add( runStopButton );
@@ -578,7 +603,6 @@ public class MainWindow extends JFrame{
 
 	//Adds a register to the system
 	public void addRegister( String name, int value ) {
-		
 		//The panel to contain the register
 		JPanel register = new JPanel();
 		register.setLayout( new BorderLayout() );
@@ -608,7 +632,36 @@ public class MainWindow extends JFrame{
 		
 		//Initialize this register in logic as well
 		logic.addRegister( name, value );
+	}
+	
+	//Adds a memory space to the UI
+	public void addMainMemorySpace( int key, int value ) {
+		//The panel to contain the register
+		JPanel mainMemorySpace = new JPanel();
+		mainMemorySpace.setLayout( new BorderLayout() );
+		mainMemorySpace.setMinimumSize( new Dimension( 50, -1 ) );
+		mainMemorySpace.setPreferredSize( new Dimension( 50, -1 ) );
+
+		//Add a border
+		mainMemorySpace.setBorder(BorderFactory.createLineBorder(Color.black));
+
+		//The label to hold the memory space name
+		JLabel topLabel = new JLabel( "M" + key );
+		topLabel.setHorizontalAlignment( JLabel.CENTER );
+		topLabel.setFont( font );
+		mainMemorySpace.add( topLabel, BorderLayout.NORTH );
+
+		//The label to hold the register value
+		JLabel bottomLabel = new JLabel( String.valueOf( value ) );
+		bottomLabel.setHorizontalAlignment( JLabel.CENTER );
+		bottomLabel.setFont( font );
+		mainMemorySpace.add( bottomLabel, BorderLayout.SOUTH );
 		
+		//Add the bottom label to the mainMemoryLabels array so it can be edited later
+		mainMemoryLabels[ key ] = bottomLabel;
+
+		//Add this memory space to the list
+		mainMemoryPanel.add( mainMemorySpace );
 	}
 	
 	public void setRegisterValue( String name, int value ) {
