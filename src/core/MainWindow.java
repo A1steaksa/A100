@@ -497,7 +497,7 @@ public class MainWindow extends JFrame{
 	public void error( String str ) {
 
 		//Print the error
-		print( "Line #" + ( logic.getRegisterValue( "PC" ) + 1 ) + ": " + str );
+		print( "Line #" + logic.getRegisterValue( "PC" ) + ": " + str );
 
 		//Halt
 		switchToEditMode();

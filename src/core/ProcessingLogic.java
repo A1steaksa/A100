@@ -72,7 +72,7 @@ public class ProcessingLogic {
 
 		//Return the cleared value
 		return registerValue;
-
+		
 	}
 
 	//A wrapper for print
@@ -137,6 +137,30 @@ public class ProcessingLogic {
 
 		return output;
 	}
+	
+	//Gets the value of an argument string or its register's value
+	public int getArgumentValue( String argument ) {
+		if( isRegister( argument ) ) {
+			return getRegisterValue( argument );
+		}else {
+			//Otherwise it's a literal
+			return getLiteral( argument );
+		}
+	}
+	
+	//Gets the line number of a label
+	public int getLabelLineNumber( String labelName ){
+		
+		//Get the label's line number
+		Integer lineNumber = labels.get( labelName );
+		
+		//Make sure we have a valid label
+		if( lineNumber == null ) {
+			error( Strings.InvalidLabelReference );
+		}
+		
+		return lineNumber;
+	}
 
 	//Returns whether or not there is a next line available for execution
 	public boolean hasNextLine() {
@@ -156,7 +180,9 @@ public class ProcessingLogic {
 
 		//Get the current line
 		String line = window.getLine( getRegisterValue( "PC" ) );
-
+		line = line.toUpperCase();
+		line = line.trim();
+		
 		//Increment the program counter
 		setRegisterValue( "PC",  getRegisterValue( "PC" ) + 1 );
 		
@@ -171,18 +197,14 @@ public class ProcessingLogic {
 
 		//If we don't skip, continue processing
 		if( !skip ) {
-			line = line.toUpperCase();
-
+			
 			//Break the line apart by spaces as those are our delimiter
-			String[] splitLine = line.split( " " );
+			String[] splitLine = line.split( "\\s+" );
 
 			//Trim everything to avoid errors later
 			for (int i = 0; i < splitLine.length; i++) {
 				splitLine[ i ] = splitLine[ i ].trim();
 			}
-
-			//Skip incrementing the PC
-			boolean skipPC = false;
 			
 			//We're going to use a switch case for this
 			switch( splitLine[ 0 ] ) {
@@ -211,7 +233,19 @@ public class ProcessingLogic {
 				SUB( splitLine[ 1 ], splitLine[ 2 ], splitLine[ 3 ] );
 				break;
 
+			case "BNE":
+				
+				if( splitLine.length != 4 ) {
+					error( Strings.WrongNumberOfArguments );
+				}
+				
+				BNE( splitLine[ 1 ], splitLine[ 2 ], splitLine[ 3 ] );
+				
+				break;
 			default:
+				
+				print( splitLine[ 0 ] );
+				
 				error( Strings.UnrecognizedOpcode );
 			}
 
@@ -219,8 +253,15 @@ public class ProcessingLogic {
 
 		//Check if we have reached the end of the code
 		if( !hasNextLine() ) {
-			print( "Execution finished" );
+			
+			//Depending on how we finished, print out a success or failure message
+			if( halt ) {
+				print( Strings.ExitWithError );
+			}else {
+				print( Strings.ExitNormal );
+			}
 
+			//Switch away from execution mode
 			window.switchToEditMode();
 		}else {
 			//Highlight the new line
@@ -258,6 +299,11 @@ public class ProcessingLogic {
 				//Get the name without the ending
 				String labelName = line.substring( 0, line.length() - 1 );
 				
+				//Remember, no spaces
+				if( labelName.indexOf( " " ) != -1 ) {
+					error( Strings.LabelContainedSpaces );
+				}
+				
 				//save it in the labels map
 				labels.put( labelName,  i );
 				
@@ -275,21 +321,11 @@ public class ProcessingLogic {
 	//Performs the MOV command
 	public void MOV( String A, String B ) {
 
-		int valueA = -1;
-
-		//If A is not a register, we need to get the value from what A references
-		if( !isRegister( A ) ) {
-			//Convert A to an integer
-			valueA = getLiteral( A );
-		}else {
-			//Otherwise we can just get it directly
-
-			//Get A's register's value
-			valueA = getRegisterValue( A );
-		}
+		//Get A's value
+		int valueA = getArgumentValue( A );
 
 		//Error checking
-
+		
 		//Check that B is a register
 		if( !isRegister( B ) ) {
 			error( Strings.ArgumentIsNotRegister );
@@ -309,24 +345,8 @@ public class ProcessingLogic {
 		}
 
 		//Values of A and B
-		int valueA = -1;
-		int valueB = -1;
-
-		//Get values for A
-		if( isRegister( A ) ) {
-			valueA = getRegisterValue( A );
-		}else {
-			//Otherwise it's a literal
-			valueA = getLiteral( A );
-		}
-
-		//Get values for B
-		if( isRegister( B ) ) {
-			valueB = getRegisterValue( B );
-		}else {
-			//Otherwise it's a literal
-			valueB = getLiteral( B );
-		}
+		int valueA = getArgumentValue( A );
+		int valueB = getArgumentValue( B );
 
 		//Do the addition
 		int result = valueA + valueB;
@@ -345,24 +365,8 @@ public class ProcessingLogic {
 		}
 
 		//Values of A and B
-		int valueA = -1;
-		int valueB = -1;
-
-		//Get values for A
-		if( isRegister( A ) ) {
-			valueA = getRegisterValue( A );
-		}else {
-			//Otherwise it's a literal
-			valueA = getLiteral( A );
-		}
-
-		//Get values for B
-		if( isRegister( B ) ) {
-			valueB = getRegisterValue( B );
-		}else {
-			//Otherwise it's a literal
-			valueB = getLiteral( B );
-		}
+		int valueA = getArgumentValue( A );
+		int valueB = getArgumentValue( B );
 
 		//Do the subtraction
 		int result = valueA - valueB;
@@ -371,5 +375,31 @@ public class ProcessingLogic {
 		setRegisterValue( C, result );
 
 	}
+	
+	/*
+	 * Branching
+	 */
+	
+	public void BNE( String A, String B, String labelName ) {
+		
+		//Get values of A and B
+		int valueA = getArgumentValue( A );
+		int valueB = getArgumentValue( B );
+		
+		//Get the label's line number
+		int lineNumber = getLabelLineNumber( labelName );
+		
+		//Check if they're not equal
+		if( valueA != valueB ) {
+			
+			//Branch to line number
+			setRegisterValue( "PC", lineNumber );
+			
+		}
+		
+		
+	}
+	
+	
 
 }
