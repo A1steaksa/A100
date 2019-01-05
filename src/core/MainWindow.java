@@ -454,9 +454,6 @@ public class MainWindow extends JFrame{
 
 					//Otherwise, switch to execution mode
 					switchToExecutionMode();
-					
-					//Highlight the first line
-					highlightLine( 0 );
 
 				}
 
@@ -497,7 +494,7 @@ public class MainWindow extends JFrame{
 	public void error( String str ) {
 
 		//Print the error
-		print( "Line #" + logic.getRegisterValue( "PC" ) + ": " + str );
+		print( "Line #" + logic.lastLine + ": " + str );
 
 		//Halt
 		switchToEditMode();
@@ -549,7 +546,7 @@ public class MainWindow extends JFrame{
 		clearConsole();
 		
 		//Reset the logic
-		logic.reset();
+		logic.getReadyToRun();
 		
 		//Preprocess the code
 		logic.preprocess();

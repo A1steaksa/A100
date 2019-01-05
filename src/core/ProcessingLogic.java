@@ -23,6 +23,9 @@ public class ProcessingLogic {
 	//Labels and their associated lines
 	public Map<String, Integer> labels = new HashMap<String, Integer>();
 
+	//Tracks our last executed line for error reporting
+	public int lastLine = -1;
+	
 	//Called when all main sections are created in primary
 	public void start() {
 
@@ -87,13 +90,24 @@ public class ProcessingLogic {
 	}
 	
 	//Resets logic to run again
-	public void reset() {
+	public void getReadyToRun() {
 		
 		//Clear registers
 		clearRegisters();
 		
 		//Reset halt
 		halt = false;
+		
+		//Reset last line
+		lastLine = -1;
+		
+		//Move the program counter to the first executable line
+		if( shouldSkipLine( 0 ) ) {
+			incrementProgramCounter();
+		}
+		
+		//Highlight the first executable line
+		window.highlightLine( getRegisterValue( "PC" ) );
 		
 	}
 
@@ -173,113 +187,148 @@ public class ProcessingLogic {
 		//Checks if the program counter is below the line count
 		return getRegisterValue( "PC" ) < window.getLineCount();
 	}
+	
+	//Determines if a line can be skipped (Comments, labels, etc.)
+	public boolean shouldSkipLine( int lineNumber ) {
+		
+		String line = window.getLine( lineNumber );
+		line = line.toUpperCase();
+		line = line.trim();
+		
+		if( line.startsWith( "#" ) || line.trim().length() == 0 || line.endsWith(":") ) {
+			return true;
+		}else {
+			return false;
+		}
+		
+	}
+	
+	//Finds the next executable line and moves the program counter to it
+	public void incrementProgramCounter() {
+		
+		//Increment the program counter
+		//Using a do while because have to move at least 1 line forward
+		do {
+			//Increment the program counter
+			setRegisterValue( "PC",  getRegisterValue( "PC" ) + 1 );
+			
+			//If we have run out of lines, stop here
+			if( getRegisterValue( "PC" ) >= window.getLineCount() ) {
+				break;
+			}
+		
+		//Loop if the line we just moved to needs to be skipped also
+		}while( shouldSkipLine( getRegisterValue( "PC" ) ) );
+		
+	}
 
 	//Performs the next step in execution
 	//Arguably this is the entire program
 	public void step() {
-
+		
 		//Get the current line
 		String line = window.getLine( getRegisterValue( "PC" ) );
 		line = line.toUpperCase();
 		line = line.trim();
 		
-		//Increment the program counter
-		setRegisterValue( "PC",  getRegisterValue( "PC" ) + 1 );
+		//Update last line
+		lastLine = getRegisterValue( "PC" );
 		
-		//Set to true to skip this line
-		boolean skip = false;
+		//Increment the program counter
+		//setRegisterValue( "PC",  getRegisterValue( "PC" ) + 1 );
+		incrementProgramCounter();
+		
+		//Break the line apart by spaces as those are our delimiter
+		String[] splitLine = line.split( "\\s+" );
 
-		//Check if this is a comment line or an empty line or is a label
-		if( line.startsWith( "#" ) || line.trim().length() == 0 || line.endsWith(":") ) {
-			//ignore it
-			skip = true;
+		//Trim everything to avoid errors later
+		for (int i = 0; i < splitLine.length; i++) {
+			splitLine[ i ] = splitLine[ i ].trim();
 		}
+		
+		//We're going to use a switch case for this
+		switch( splitLine[ 0 ] ) {
+		case "MOV":
 
-		//If we don't skip, continue processing
-		if( !skip ) {
-			
-			//Break the line apart by spaces as those are our delimiter
-			String[] splitLine = line.split( "\\s+" );
-
-			//Trim everything to avoid errors later
-			for (int i = 0; i < splitLine.length; i++) {
-				splitLine[ i ] = splitLine[ i ].trim();
-			}
-			
-			//We're going to use a switch case for this
-			switch( splitLine[ 0 ] ) {
-			case "MOV":
-
-				if( splitLine.length != 3 ) {
-					error( Strings.WrongNumberOfArguments );
-				}
-
-				MOV( splitLine[ 1 ], splitLine[ 2 ] );
-				break;
-			case "ADD":
-
-				if( splitLine.length != 4 ) {
-					error( Strings.WrongNumberOfArguments );
-				}
-
-				ADD( splitLine[ 1 ], splitLine[ 2 ], splitLine[ 3 ] );
-				break;
-			case "SUB":
-
-				if( splitLine.length != 4 ) {
-					error( Strings.WrongNumberOfArguments );
-				}
-
-				SUB( splitLine[ 1 ], splitLine[ 2 ], splitLine[ 3 ] );
-				break;
-
-			case "BNE":
-				
-				if( splitLine.length != 4 ) {
-					error( Strings.WrongNumberOfArguments );
-				}
-				
-				BNE( splitLine[ 1 ], splitLine[ 2 ], splitLine[ 3 ] );
-				
-				break;
-			
-			case "BEQ":
-				
-				if( splitLine.length != 4 ) {
-					error( Strings.WrongNumberOfArguments );
-				}
-				
-				BEQ( splitLine[ 1 ], splitLine[ 2 ], splitLine[ 3 ] );
-				
-				break;
-			
-			case "BGT":
-				
-				if( splitLine.length != 4 ) {
-					error( Strings.WrongNumberOfArguments );
-				}
-				
-				BGT( splitLine[ 1 ], splitLine[ 2 ], splitLine[ 3 ] );
-				
-				break;
-				
-			case "BLT":
-				
-				if( splitLine.length != 4 ) {
-					error( Strings.WrongNumberOfArguments );
-				}
-				
-				BLT( splitLine[ 1 ], splitLine[ 2 ], splitLine[ 3 ] );
-				
-				break;
-				
-			default:
-				
-				print( splitLine[ 0 ] );
-				
-				error( Strings.UnrecognizedOpcode );
+			if( splitLine.length != 3 ) {
+				error( Strings.WrongNumberOfArguments );
 			}
 
+			MOV( splitLine[ 1 ], splitLine[ 2 ] );
+			break;
+		case "ADD":
+
+			if( splitLine.length != 4 ) {
+				error( Strings.WrongNumberOfArguments );
+			}
+
+			ADD( splitLine[ 1 ], splitLine[ 2 ], splitLine[ 3 ] );
+			break;
+		case "SUB":
+
+			if( splitLine.length != 4 ) {
+				error( Strings.WrongNumberOfArguments );
+			}
+
+			SUB( splitLine[ 1 ], splitLine[ 2 ], splitLine[ 3 ] );
+			break;
+
+		case "BNE":
+			
+			if( splitLine.length != 4 ) {
+				error( Strings.WrongNumberOfArguments );
+			}
+			
+			BNE( splitLine[ 1 ], splitLine[ 2 ], splitLine[ 3 ] );
+			
+			break;
+		
+		case "BEQ":
+			
+			if( splitLine.length != 4 ) {
+				error( Strings.WrongNumberOfArguments );
+			}
+			
+			BEQ( splitLine[ 1 ], splitLine[ 2 ], splitLine[ 3 ] );
+			
+			break;
+		
+		case "BGT":
+			
+			if( splitLine.length != 4 ) {
+				error( Strings.WrongNumberOfArguments );
+			}
+			
+			BGT( splitLine[ 1 ], splitLine[ 2 ], splitLine[ 3 ] );
+			
+			break;
+			
+		case "BLT":
+			
+			if( splitLine.length != 4 ) {
+				error( Strings.WrongNumberOfArguments );
+			}
+			
+			BLT( splitLine[ 1 ], splitLine[ 2 ], splitLine[ 3 ] );
+			
+			break;
+			
+		case "JMP":
+			
+			if( splitLine.length != 2 ) {
+				error( Strings.WrongNumberOfArguments );
+			}
+			
+			JMP( splitLine[ 1 ] );
+			
+			break;
+			
+			
+		default:
+			
+			System.out.println( "Ran into default line:" + splitLine[ 0 ] + ":Which should really not happen" );
+			
+			error( Strings.UnrecognizedOpcode );
 		}
 
 		//Check if we have reached the end of the code
@@ -295,6 +344,7 @@ public class ProcessingLogic {
 			//Switch away from execution mode
 			window.switchToEditMode();
 		}else {
+			
 			//Highlight the new line
 			window.highlightLine( getRegisterValue( "PC" ) );
 		}
@@ -425,6 +475,9 @@ public class ProcessingLogic {
 		if( valueA != valueB ) {
 			//Branch to line number
 			setRegisterValue( "PC", lineNumber );
+			
+			//Jump to the next executable command
+			incrementProgramCounter();
 		}
 		
 	}
@@ -443,6 +496,9 @@ public class ProcessingLogic {
 		if( valueA == valueB ) {
 			//Branch to line number
 			setRegisterValue( "PC", lineNumber );
+			
+			//Jump to the next executable command
+			incrementProgramCounter();
 		}
 
 	}
@@ -461,6 +517,9 @@ public class ProcessingLogic {
 		if( valueA > valueB ) {
 			//Branch to line number
 			setRegisterValue( "PC", lineNumber );
+			
+			//Jump to the next executable command
+			incrementProgramCounter();
 		}
 
 	}
@@ -479,8 +538,25 @@ public class ProcessingLogic {
 		if( valueA < valueB ) {
 			//Branch to line number
 			setRegisterValue( "PC", lineNumber );
+			
+			//Jump to the next executable command
+			incrementProgramCounter();
 		}
 
+	}
+	
+	//Jump to label
+	public void JMP( String labelName ) {
+		
+		//Get the label's line number
+		int lineNumber = getLabelLineNumber( labelName );
+		
+		//Branch to line number
+		setRegisterValue( "PC", lineNumber );
+		
+		//Jump to the next executable command
+		incrementProgramCounter();
+		
 	}
 	
 

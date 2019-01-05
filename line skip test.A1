@@ -1,0 +1,13 @@
+
+
+MOV 1 R1
+
+MOV 2 R2
+
+#
+LABEL:
+
+ADD R1 R2 R3
+
+
+MOV 2 PC
