@@ -242,6 +242,37 @@ public class ProcessingLogic {
 				BNE( splitLine[ 1 ], splitLine[ 2 ], splitLine[ 3 ] );
 				
 				break;
+			
+			case "BEQ":
+				
+				if( splitLine.length != 4 ) {
+					error( Strings.WrongNumberOfArguments );
+				}
+				
+				BEQ( splitLine[ 1 ], splitLine[ 2 ], splitLine[ 3 ] );
+				
+				break;
+			
+			case "BGT":
+				
+				if( splitLine.length != 4 ) {
+					error( Strings.WrongNumberOfArguments );
+				}
+				
+				BGT( splitLine[ 1 ], splitLine[ 2 ], splitLine[ 3 ] );
+				
+				break;
+				
+			case "BLT":
+				
+				if( splitLine.length != 4 ) {
+					error( Strings.WrongNumberOfArguments );
+				}
+				
+				BLT( splitLine[ 1 ], splitLine[ 2 ], splitLine[ 3 ] );
+				
+				break;
+				
 			default:
 				
 				print( splitLine[ 0 ] );
@@ -380,6 +411,7 @@ public class ProcessingLogic {
 	 * Branching
 	 */
 	
+	//Branch not equal
 	public void BNE( String A, String B, String labelName ) {
 		
 		//Get values of A and B
@@ -391,15 +423,65 @@ public class ProcessingLogic {
 		
 		//Check if they're not equal
 		if( valueA != valueB ) {
-			
 			//Branch to line number
 			setRegisterValue( "PC", lineNumber );
-			
 		}
-		
 		
 	}
 	
+	//Branch equal
+	public void BEQ( String A, String B, String labelName ) {
+
+		//Get values of A and B
+		int valueA = getArgumentValue( A );
+		int valueB = getArgumentValue( B );
+
+		//Get the label's line number
+		int lineNumber = getLabelLineNumber( labelName );
+
+		//Check if they're not equal
+		if( valueA == valueB ) {
+			//Branch to line number
+			setRegisterValue( "PC", lineNumber );
+		}
+
+	}
+	
+	//Branch greater than
+	public void BGT( String A, String B, String labelName ) {
+
+		//Get values of A and B
+		int valueA = getArgumentValue( A );
+		int valueB = getArgumentValue( B );
+
+		//Get the label's line number
+		int lineNumber = getLabelLineNumber( labelName );
+
+		//Check if they're not equal
+		if( valueA > valueB ) {
+			//Branch to line number
+			setRegisterValue( "PC", lineNumber );
+		}
+
+	}
+	
+	//Branch greater than
+	public void BLT( String A, String B, String labelName ) {
+
+		//Get values of A and B
+		int valueA = getArgumentValue( A );
+		int valueB = getArgumentValue( B );
+
+		//Get the label's line number
+		int lineNumber = getLabelLineNumber( labelName );
+
+		//Check if they're not equal
+		if( valueA < valueB ) {
+			//Branch to line number
+			setRegisterValue( "PC", lineNumber );
+		}
+
+	}
 	
 
 }
