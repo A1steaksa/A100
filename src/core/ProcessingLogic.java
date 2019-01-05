@@ -77,6 +77,19 @@ public class ProcessingLogic {
 		return registerValue;
 		
 	}
+	
+	//Stops execution as soon as it is safe to
+	public void halt() {
+		//Depending on how we finished, print out a success or failure message
+		if( halt ) {
+			print( Strings.ExitWithError );
+		}else {
+			print( Strings.ExitNormal );
+		}
+
+		//Switch away from execution mode
+		window.switchToEditMode();
+	}
 
 	//A wrapper for print
 	private void print( String str ) {
@@ -99,11 +112,18 @@ public class ProcessingLogic {
 		halt = false;
 		
 		//Reset last line
-		lastLine = -1;
+		lastLine = 0;
 		
 		//Move the program counter to the first executable line
 		if( shouldSkipLine( 0 ) ) {
 			incrementProgramCounter();
+		}
+		
+		//If there's nothing to execute, throw an error to that effect
+		if( getRegisterValue( "PC" ) >= window.getLineCount() ) {
+			error( Strings.EmptyFile );
+			
+			halt();
 		}
 		
 		//Highlight the first executable line
@@ -334,15 +354,8 @@ public class ProcessingLogic {
 		//Check if we have reached the end of the code
 		if( !hasNextLine() ) {
 			
-			//Depending on how we finished, print out a success or failure message
-			if( halt ) {
-				print( Strings.ExitWithError );
-			}else {
-				print( Strings.ExitNormal );
-			}
-
-			//Switch away from execution mode
-			window.switchToEditMode();
+			halt();
+			
 		}else {
 			
 			//Highlight the new line

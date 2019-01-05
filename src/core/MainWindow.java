@@ -507,7 +507,7 @@ public class MainWindow extends JFrame{
 
 	//Disable edit items items and enable execution items
 	public void switchToEditMode() {
-
+		
 		//Enable editing items
 		saveButton.setEnabled( true );
 		newButton.setEnabled( true );
@@ -541,15 +541,6 @@ public class MainWindow extends JFrame{
 
 	//Disable editing items and enable execution items
 	public void switchToExecutionMode() {
-
-		//Clear the console
-		clearConsole();
-		
-		//Reset the logic
-		logic.getReadyToRun();
-		
-		//Preprocess the code
-		logic.preprocess();
 		
 		//Disable editing items
 		saveButton.setEnabled( false );
@@ -573,6 +564,15 @@ public class MainWindow extends JFrame{
 		codeLineNumber.repaint();
 
 		isRunning = true;
+		
+		//Clear the console
+		clearConsole();
+		
+		//Reset the logic
+		logic.getReadyToRun();
+		
+		//Preprocess the code
+		logic.preprocess();
 
 	}
 
@@ -795,8 +795,10 @@ public class MainWindow extends JFrame{
 			int lineEnd = codeTextArea.getLineEndOffset( lineNumber );
 			previousLineHighlighter = codeTextArea.getHighlighter().addHighlight( lineStart, lineEnd, new DefaultHighlighter.DefaultHighlightPainter( Config.highlightedColor ) );
 		} catch (BadLocationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			
+			//If this line doesn't exist, don't even try to highlight it as we have other methods to deal with these errors internally
+			//And I hate stacks printing in console needlessly
+			
 		}
 		
 	}

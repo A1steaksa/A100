@@ -17,6 +17,11 @@ public class Strings {
 	
 	public static String LabelContainedSpaces = "A label contained spaces!";
 	
+	public static String EmptyFile = "You cannot run a file without executable commands!";
+	
+	/*
+	 * Exit condition messages
+	 */
 	public static String ExitWithError = "Execution halted with error(s)";
 	
 	public static String ExitNormal = "Execution finished";
