@@ -16,6 +16,9 @@ public class Config {
 	//Highlighted line color
 	public static Color highlightedColor = Color.GRAY;
 	
+	//Highlighted memory address color
+	public static Color highlightedMemoryAddressColor = Color.RED;
+	
 	//The font size
 	public static int fontSize = 18;
 	

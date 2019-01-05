@@ -28,6 +28,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
@@ -56,6 +57,9 @@ public class MainWindow extends JFrame{
 
 	//The highlight of the last line executed.  We need this to remove that highlight
 	Object previousLineHighlighter;
+	
+	//The currently highlighted memory address.  We need this to remove that highlight
+	JLabel previousMemoryAddress;
 
 	//Stores the labels associated with the registers
 	Map<String, JLabel> registerLabels = new HashMap<String, JLabel>();
@@ -102,6 +106,9 @@ public class MainWindow extends JFrame{
 	
 	//Panel for main memory
 	JPanel mainMemoryPanel;
+	
+	//Main memory scroll bar
+	JScrollPane mainMemoryPanelScrollPane;
 	
 	//A reference to the processing logic
 	private ProcessingLogic logic;
@@ -279,6 +286,9 @@ public class MainWindow extends JFrame{
 		//Program counter
 		addRegister( "PC", 0 );
 		
+		//Memory read/write head
+		addRegister( "MH", 0 );
+		
 		//Add regular registers
 		for (int i = 0; i < Config.registerCount; i++) {
 			addRegister( "R" + i, 0 );
@@ -288,6 +298,7 @@ public class MainWindow extends JFrame{
 		JScrollPane registersPanelScrollPane = new JScrollPane( registersPanel );
 		registersPanelScrollPane.setMinimumSize( new Dimension( Integer.MAX_VALUE, 50 ) );
 		registersPanelScrollPane.setMaximumSize( new Dimension( Integer.MAX_VALUE, 50 ) );
+		registersPanelScrollPane.setVerticalScrollBarPolicy( JScrollPane.VERTICAL_SCROLLBAR_NEVER );
 		
 		//Main memory
 		mainMemoryPanel = new JPanel();
@@ -300,7 +311,7 @@ public class MainWindow extends JFrame{
 		}
 
 		//Main memory scroll pane
-		JScrollPane mainMemoryPanelScrollPane = new JScrollPane( mainMemoryPanel );
+		mainMemoryPanelScrollPane = new JScrollPane( mainMemoryPanel );
 		mainMemoryPanelScrollPane.setMinimumSize( new Dimension( Integer.MAX_VALUE, 75 ) );
 		mainMemoryPanelScrollPane.setMaximumSize( new Dimension( Integer.MAX_VALUE, 75 ) );
 		mainMemoryPanelScrollPane.setPreferredSize( new Dimension( Integer.MAX_VALUE, 75 ) );
@@ -610,7 +621,7 @@ public class MainWindow extends JFrame{
 		register.setPreferredSize( new Dimension( 50, -1 ) );
 
 		//Add a border
-		register.setBorder(BorderFactory.createLineBorder(Color.black));
+		register.setBorder( BorderFactory.createLineBorder( Color.black ) );
 
 		//The label to hold the register name
 		JLabel topLabel = new JLabel( name );
@@ -643,7 +654,7 @@ public class MainWindow extends JFrame{
 		mainMemorySpace.setPreferredSize( new Dimension( 50, -1 ) );
 
 		//Add a border
-		mainMemorySpace.setBorder(BorderFactory.createLineBorder(Color.black));
+		mainMemorySpace.setBorder( BorderFactory.createLineBorder( Color.black ) );
 
 		//The label to hold the memory space name
 		JLabel topLabel = new JLabel( "M" + key );
@@ -664,10 +675,43 @@ public class MainWindow extends JFrame{
 		mainMemoryPanel.add( mainMemorySpace );
 	}
 	
+	//This highlights a memory address as being the currently selected one
+	public void highlightMemoryAddress( int address ) {
+		
+		//Unhighlight the previous memory address if there is one
+		if( previousMemoryAddress != null ) {
+			( (JPanel) previousMemoryAddress.getParent() ).setBorder( BorderFactory.createLineBorder( Color.black ) );
+		}	
+		
+		//Highlight the new address
+		( (JPanel) mainMemoryLabels[ address ].getParent() ).setBorder( BorderFactory.createLineBorder( Config.highlightedMemoryAddressColor, 3 ) );
+		
+		//Save the new address as the previous memory address
+		previousMemoryAddress = mainMemoryLabels[ address ];
+		
+		//Scroll to the newly highlighted address
+		JScrollBar bar = mainMemoryPanelScrollPane.getHorizontalScrollBar();
+		
+		//Calculate our address percentage
+		float addressPercent = ( (float) address / (float) Config.mainMemoryLength );
+		
+		//Calculate the bar value to match our address percentage
+		float barValue = addressPercent * (float) bar.getMaximum();
+		
+		//Set our bar value to that
+		bar.setValue( (int) barValue );
+		
+		
+	}
+	
+	//Change the text of a register label
 	public void setRegisterValue( String name, int value ) {
-		
 		registerLabels.get( name ).setText( String.valueOf( value ) );
-		
+	}
+	
+	//Change the text of a memory label
+	public void setMainMemoryValue( int address, int value ) {
+		mainMemoryLabels[ address ].setText( String.valueOf( value ) );
 	}
 	
 	//Returns whether or not a file is open

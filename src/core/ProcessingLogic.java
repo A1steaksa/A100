@@ -22,7 +22,10 @@ public class ProcessingLogic {
 	
 	//Labels and their associated lines
 	public Map<String, Integer> labels = new HashMap<String, Integer>();
-
+	
+	//Main memory's array
+	public int[] mainMemory = new int[ Config.mainMemoryLength ];
+	
 	//Tracks our last executed line for error reporting
 	public int lastLine = -1;
 	
@@ -78,6 +81,35 @@ public class ProcessingLogic {
 		
 	}
 	
+	//Stores a value into main memory at an address and throws a halting error if that memory address doesn't exist
+	public void setMainMemoryValue( int address, int value ) {
+		
+		//Check for out of bounds exception
+		if( address < 0 || address >= Config.mainMemoryLength ) {
+			error( Strings.MemoryHeadOutOfBounds );
+		}
+		
+		//Store the value at the address
+		mainMemory[ address ] = value;
+		
+		//Update the UI
+		window.setMainMemoryValue( address, value );
+		
+	}
+	
+	//Returns the value of main memory at a given address and throws a halting error if that memory address doesn't exist
+	public int getMainMemoryValue( int address ) {
+		
+		//Check for out of bounds exception
+		if( address < 0 || address >= Config.mainMemoryLength ) {
+			error( Strings.MemoryHeadOutOfBounds );
+		}
+		
+		//Return the cleared value
+		return mainMemory[ address ];
+		
+	}
+	
 	//Stops execution as soon as it is safe to
 	public void halt() {
 		//Depending on how we finished, print out a success or failure message
@@ -114,6 +146,9 @@ public class ProcessingLogic {
 		//Reset last line
 		lastLine = 0;
 		
+		//Reset the memory head
+		setRegisterValue( "MH", 0 );
+		
 		//Move the program counter to the first executable line
 		if( shouldSkipLine( 0 ) ) {
 			incrementProgramCounter();
@@ -128,6 +163,9 @@ public class ProcessingLogic {
 		
 		//Highlight the first executable line
 		window.highlightLine( getRegisterValue( "PC" ) );
+		
+		//Highlight the memory head
+		window.highlightMemoryAddress( getRegisterValue( "MH" ) );
 		
 	}
 
@@ -333,22 +371,50 @@ public class ProcessingLogic {
 			
 			break;
 			
-		case "JMP":
+		case "BR":
 			
 			if( splitLine.length != 2 ) {
 				error( Strings.WrongNumberOfArguments );
 			}
 			
-			JMP( splitLine[ 1 ] );
+			BR( splitLine[ 1 ] );
 			
 			break;
 			
+		case "LOAD":
+			
+			if( splitLine.length != 2 ) {
+				error( Strings.WrongNumberOfArguments );
+			}
+			
+			LOAD( splitLine[ 1 ] );
+			
+			break;
+		
+		case "STORE":
+			
+			if( splitLine.length != 2 ) {
+				error( Strings.WrongNumberOfArguments );
+			}
+			
+			STORE( splitLine[ 1 ] );
+			
+			break;
 			
 		default:
 			
 			System.out.println( "Ran into default line:" + splitLine[ 0 ] + ":Which should really not happen" );
 			
 			error( Strings.UnrecognizedOpcode );
+		}
+		
+		//Highlight the current memory head position if it's valid and throw an error if it's not
+		if( getRegisterValue( "MH" ) < 0 || getRegisterValue( "MH" ) >= Config.mainMemoryLength ) {
+			
+			error( Strings.MemoryHeadOutOfBounds );
+			
+		}else {
+			window.highlightMemoryAddress( getRegisterValue( "MH" ) );
 		}
 
 		//Check if we have reached the end of the code
@@ -559,7 +625,7 @@ public class ProcessingLogic {
 	}
 	
 	//Jump to label
-	public void JMP( String labelName ) {
+	public void BR( String labelName ) {
 		
 		//Get the label's line number
 		int lineNumber = getLabelLineNumber( labelName );
@@ -569,6 +635,28 @@ public class ProcessingLogic {
 		
 		//Jump to the next executable command
 		incrementProgramCounter();
+		
+	}
+	
+	//Load from main memory
+	public void LOAD( String A ) {
+		
+		//Get what's in memory at MH
+		int mainMemoryValue = getMainMemoryValue( getRegisterValue( "MH" ) );
+		
+		//Load it into register A
+		setRegisterValue( A, mainMemoryValue );
+		
+	}
+	
+	//Store into main memory
+	public void STORE( String A ) {
+		
+		//Get A's value
+		int valueA = getArgumentValue( A );
+		
+		//Save it into main memory at MH
+		setMainMemoryValue( getRegisterValue( "MH" ), valueA );
 		
 	}
 	

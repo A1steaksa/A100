@@ -3,6 +3,8 @@ public class Strings {
 	
 	public static String NumberOutOfBounds = "A number was outside the bounds [" + Config.minNumberRange + ", " + Config.maxNumberRange  + "]!";
 	
+	public static String MemoryHeadOutOfBounds = "The main memory read/write head is outside the bounds [0, " + ( Config.mainMemoryLength - 1 ) + "]!";
+	
 	public static String ArgumentIsNotRegister = "An argument was expected to be a register but was not or was out of bounds!";
 	
 	public static String UnrecognizedOpcode = "An invalid opcode was found!";
