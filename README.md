@@ -9,9 +9,9 @@ arguments can be either literals or registers. If an argument must be one or the
 other, that will be specified in the explanation.
 
 For example:
-
+```
 “Adds A and B together and stores the result in register C”
-
+```
 >   Indicates that A and B can be either registers or literals, but C must be a
 >   register because C was specified to be a register.
 
@@ -26,6 +26,7 @@ For example:
 ```
 >   Is the syntax for a 2-argument call.
 ```
+
 <OPCODE> <ARGUMENT1>
 ```
 >   Is the syntax for a single argument call.
@@ -44,6 +45,7 @@ For example:
 R5
 ```
 >   References register 5, or the 6th register.
+
 ```
 R22
 ```
@@ -57,6 +59,7 @@ For example:
 PC
 ```
 >   References the program counter register.
+
 ```
 MH
 ```
@@ -67,11 +70,10 @@ MH
 A comment is any line beginning with “\#”.
 
 For example:
-
-1.  \#This is a comment that will be ignored.
-
-2.  \# Comments could also have a space after the first symbol
-
+```
+1  #This is a comment that will be ignored.
+2  # Comments could also have a space after the first symbol
+```
 ### Number Space
 
 A1 uses a simplified integer space in the range [-9,999, 9,999]. Storing any value
@@ -82,13 +84,14 @@ above that will result in a halting error.
 Labels in A1 can be any string without spaces that is ended by a “:”.
 
 For example:
-
-1.  START:
-
+```
+1  START:
+```
 >   Is a label called “START”.
 
-1.  MULTIPLE_WORD_LABEL:
-
+```
+1  MULTIPLE_WORD_LABEL:
+```
 >   Is an example of a multi-word label.
 
 ### Main Memory
