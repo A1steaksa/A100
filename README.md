@@ -1,8 +1,8 @@
-Terms & Misc.
-=============
+# A100 Reference Manual
 
-A Note on this Documentation
-----------------------------
+## Terms & Misc.
+
+### A Note on this Documentation
 
 When reading this documentation, keep in mind that unless otherwise specified,
 arguments can be either literals or registers. If an argument must be one or the
@@ -15,8 +15,7 @@ For example:
 >   Indicates that A and B can be either registers or literals, but C must be a
 >   register because C was specified to be a register.
 
-Arguments and delimiters
-------------------------
+### Arguments and delimiters
 
 In A1, the correct syntax for a command is the opcode followed by space
 delimited arguments as appropriate for the opcode used.
@@ -31,13 +30,11 @@ For example:
 
 >   Is the syntax for a single argument call.
 
-Correct Case
-------------
+### Correct Case
 
 Correct A1 style is all uppercase.
 
-Registers
----------
+### Registers
 
 Normal registers are 0 indexed and referenced via the prefix R followed by the
 suffix of their number.
@@ -65,8 +62,7 @@ MH
 
 >   References the main memory read/write head position.
 
-Comments
---------
+### Comments
 
 A comment is any line beginning with “\#”.
 
@@ -76,14 +72,12 @@ For example:
 
 2.  \# Comments could also have a space after the first symbol
 
-Number Space
-------------
+### Number Space
 
 A1 uses a simplified integer space in the range [-9,999, 9,999]. Storing any value
 above that will result in a halting error.
 
-Labels
-------
+### Labels
 
 Labels in A1 can be any string without spaces that is ended by a “:”.
 
@@ -97,19 +91,16 @@ For example:
 
 >   Is an example of a multi-word label.
 
-Main Memory
------------
+### Main Memory
 
 Main memory in A1 is a set of 10,000 memory addresses in the range [0, 9999].
 Main memory is accessed using the LOAD and STORE opcodes which load or store
 values based on the current value of the main memory read/write head position
 register MH.
 
-Opcodes
-=======
+## Opcodes
 
-MOV \<A\> \<B\>
----------------
+### MOV \<A\> \<B\>
 
 Copies A to register B.
 
@@ -123,8 +114,7 @@ For example:
 
 >   Moves the value from register 1 into register 4.
 
-ADD \<A\> \<B\> \<C\>
----------------------
+### ADD \<A\> \<B\> \<C\>
 
 Adds A and B together and stores the result in register C.
 
@@ -138,8 +128,7 @@ For example:
 
 >   Adds register 1 and register 2 together and stores the result in register 3.
 
-SUB \<A\> \<B\> \<C\>
----------------------
+### SUB \<A\> \<B\> \<C\>
 
 Subtracts B from A and stores the result in register C.
 
@@ -153,8 +142,7 @@ For example:
 
 >   Subtracts register 2 from register 1 and stores the result in register 3.
 
-BNE \<A\> \<B\> \<C\>
----------------------
+### BNE \<A\> \<B\> \<C\>
 
 Checks if A is not equal to B and branches to label C if that is the case.
 
@@ -165,8 +153,7 @@ For example:
 >   Compares the literal 0 and register 1 and branches to the label START if
 >   they’re not equal.
 
-BEQ \<A\> \<B\> \<C\>
----------------------
+### BEQ \<A\> \<B\> \<C\>
 
 Checks if A is equal to B and branches to label C if that is the case.
 
@@ -177,8 +164,7 @@ For example:
 >   Compares register 0 and the literal 8 and branches to the label LOOP if
 >   they’re equal.
 
-BGT \<A\> \<B\> \<C\>
----------------------
+### BGT \<A\> \<B\> \<C\>
 
 Checks if A is greater than B and branches to label C if that is the case.
 
@@ -188,8 +174,7 @@ For example:
 
 >   Branches to the label NEXT_JUMP if register 0 is greater than register 1.
 
-BLT \<A\> \<B\> \<C\>
----------------------
+### BLT \<A\> \<B\> \<C\>
 
 Checks if A is less than B and branches to label C if that is the case.
 
@@ -200,8 +185,7 @@ For example:
 >   Branches to the label CHILDNODE if the literal 500 is greater than register
 >   3.
 
-BR \<A\>
---------
+### BR \<A\>
 
 Branches without conditional checking to label A.
 
@@ -211,8 +195,7 @@ For example:
 
 >   Jumps to a label called START.
 
-LOAD \<A\>
-----------
+### LOAD \<A\>
 
 Loads the value of the memory address currently in register MH and stores it
 into register A.
@@ -226,8 +209,7 @@ For example:
 >   Moves the main memory read/write head to position 5 or the 6th memory
 >   address and loads its value into register 1.
 
-STORE \<A\>
------------
+### STORE \<A\>
 
 Stores A into the memory address currently in register MH.
 
