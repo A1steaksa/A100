@@ -107,13 +107,14 @@ register MH.
 Copies A to register B.
 
 For example:
-
-1.  MOV 1 R2
-
+```
+1  MOV 1 R2
+```
 >   Moves the literal number 1 into register 2.
 
-1.  MOV R1 R4
-
+```
+1  MOV R1 R4
+```
 >   Moves the value from register 1 into register 4.
 
 ### ADD \<A\> \<B\> \<C\>
@@ -121,13 +122,14 @@ For example:
 Adds A and B together and stores the result in register C.
 
 For example:
-
-1.  ADD 1 R1 R1
-
+```
+1  ADD 1 R1 R1
+```
 >   Increments register 1 by 1.
 
-1.  ADD R1 R2 R3
-
+```
+1  ADD R1 R2 R3
+```
 >   Adds register 1 and register 2 together and stores the result in register 3.
 
 ### SUB \<A\> \<B\> \<C\>
@@ -135,13 +137,14 @@ For example:
 Subtracts B from A and stores the result in register C.
 
 For example:
-
-1.  SUB 1 2 R0
-
+```
+1  SUB 1 2 R0
+```
 >   Subtracts 2 from 1 and stores the resulting -1 in register 0.
 
-1.  SUB R1 R2 R3
-
+```
+1  SUB R1 R2 R3
+```
 >   Subtracts register 2 from register 1 and stores the result in register 3.
 
 ### BNE \<A\> \<B\> \<C\>
@@ -149,9 +152,9 @@ For example:
 Checks if A is not equal to B and branches to label C if that is the case.
 
 For example:
-
-1.  BNE 0 R1 START
-
+```
+1  BNE 0 R1 START
+```
 >   Compares the literal 0 and register 1 and branches to the label START if
 >   they’re not equal.
 
@@ -160,9 +163,9 @@ For example:
 Checks if A is equal to B and branches to label C if that is the case.
 
 For example:
-
-1.  BEQ R0 8 LOOP
-
+```
+1  BEQ R0 8 LOOP
+```
 >   Compares register 0 and the literal 8 and branches to the label LOOP if
 >   they’re equal.
 
@@ -171,9 +174,9 @@ For example:
 Checks if A is greater than B and branches to label C if that is the case.
 
 For example:
-
-1.  BGT R0 R1 NEXT_JUMP
-
+```
+1  BGT R0 R1 NEXT_JUMP
+```
 >   Branches to the label NEXT_JUMP if register 0 is greater than register 1.
 
 ### BLT \<A\> \<B\> \<C\>
@@ -181,9 +184,9 @@ For example:
 Checks if A is less than B and branches to label C if that is the case.
 
 For example:
-
-1.  BGT 500 R3 CHILDNODE
-
+```
+1  BGT 500 R3 CHILDNODE
+```
 >   Branches to the label CHILDNODE if the literal 500 is greater than register
 >   3.
 
@@ -192,9 +195,9 @@ For example:
 Branches without conditional checking to label A.
 
 For example:
-
-1.  BR START
-
+```
+1  BR START
+```
 >   Jumps to a label called START.
 
 ### LOAD \<A\>
@@ -203,11 +206,10 @@ Loads the value of the memory address currently in register MH and stores it
 into register A.
 
 For example:
-
-1.  MOV 5 MH
-
-2.  LOAD R1
-
+```
+1  MOV 5 MH
+2  LOAD R1
+```
 >   Moves the main memory read/write head to position 5 or the 6th memory
 >   address and loads its value into register 1.
 
@@ -216,10 +218,9 @@ For example:
 Stores A into the memory address currently in register MH.
 
 For example:
-
-1.  MOV 100 MH
-
-2.  STORE R5
-
+```
+1  MOV 100 MH
+2  STORE R5
+```
 >   Moves the main memory read/write head to position 100 or the 101st memory
 >   address and stores the value of register 5 into it.
