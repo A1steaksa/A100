@@ -1,7 +1,3 @@
----
-title: A100 Reference Manual
----
-
 Terms & Misc.
 =============
 
