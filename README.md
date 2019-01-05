@@ -237,5 +237,5 @@ For example:
 
 2.  STORE R5
 
->   Moves the main memory read/write head to position 100 or the 1001st memory
+>   Moves the main memory read/write head to position 100 or the 101st memory
 >   address and stores the value of register 5 into it.
