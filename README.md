@@ -75,7 +75,7 @@ For example:
 ```
 ### Number Space
 
-A1 uses a simplified integer space in the range [-9,999, 9,999]. Storing any value
+A1 uses a simplified short space in the range [-32,768, 32,767]. Storing any value
 above that will result in a halting error.
 
 ### Labels
