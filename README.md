@@ -70,8 +70,8 @@ A comment is any line beginning with “\#”.
 
 For example:
 ```
-1  #This is a comment that will be ignored.
-2  # Comments could also have a space after the first symbol
+0  #This is a comment that will be ignored.
+1  # Comments could also have a space after the first symbol
 ```
 ### Number Space
 
@@ -84,12 +84,12 @@ Labels in A1 can be any string without spaces that is ended by a “:”.
 
 For example:
 ```
-1  START:
+0  START:
 ```
 >   Is a label called “START”.
 
 ```
-1  MULTIPLE_WORD_LABEL:
+0  MULTIPLE_WORD_LABEL:
 ```
 >   Is an example of a multi-word label.
 
@@ -108,12 +108,12 @@ Copies A to register B.
 
 For example:
 ```
-1  MOV 1 R2
+0  MOV 1 R2
 ```
 >   Moves the literal number 1 into register 2.
 
 ```
-1  MOV R1 R4
+0  MOV R1 R4
 ```
 >   Moves the value from register 1 into register 4.
 
@@ -123,12 +123,12 @@ Adds A and B together and stores the result in register C.
 
 For example:
 ```
-1  ADD 1 R1 R1
+0  ADD 1 R1 R1
 ```
 >   Increments register 1 by 1.
 
 ```
-1  ADD R1 R2 R3
+0  ADD R1 R2 R3
 ```
 >   Adds register 1 and register 2 together and stores the result in register 3.
 
@@ -138,12 +138,12 @@ Subtracts B from A and stores the result in register C.
 
 For example:
 ```
-1  SUB 1 2 R0
+0  SUB 1 2 R0
 ```
 >   Subtracts 2 from 1 and stores the resulting -1 in register 0.
 
 ```
-1  SUB R1 R2 R3
+0  SUB R1 R2 R3
 ```
 >   Subtracts register 2 from register 1 and stores the result in register 3.
 
@@ -153,7 +153,7 @@ Checks if A is not equal to B and branches to label C if that is the case.
 
 For example:
 ```
-1  BNE 0 R1 START
+0  BNE 0 R1 START
 ```
 >   Compares the literal 0 and register 1 and branches to the label START if
 >   they’re not equal.
@@ -164,7 +164,7 @@ Checks if A is equal to B and branches to label C if that is the case.
 
 For example:
 ```
-1  BEQ R0 8 LOOP
+0  BEQ R0 8 LOOP
 ```
 >   Compares register 0 and the literal 8 and branches to the label LOOP if
 >   they’re equal.
@@ -175,7 +175,7 @@ Checks if A is greater than B and branches to label C if that is the case.
 
 For example:
 ```
-1  BGT R0 R1 NEXT_JUMP
+0  BGT R0 R1 NEXT_JUMP
 ```
 >   Branches to the label NEXT_JUMP if register 0 is greater than register 1.
 
@@ -185,7 +185,7 @@ Checks if A is less than B and branches to label C if that is the case.
 
 For example:
 ```
-1  BGT 500 R3 CHILDNODE
+0  BGT 500 R3 CHILDNODE
 ```
 >   Branches to the label CHILDNODE if the literal 500 is greater than register.
 >   3.
@@ -196,7 +196,7 @@ Branches without conditional checking to label A.
 
 For example:
 ```
-1  BR START
+0  BR START
 ```
 >   Jumps to a label called START.
 
@@ -207,8 +207,8 @@ into register A.
 
 For example:
 ```
-1  MOV 5 MH
-2  LOAD R1
+0  MOV 5 MH
+1  LOAD R1
 ```
 >   Moves the main memory read/write head to position 5 or the 6th memory.
 >   address and loads its value into register 1.
@@ -219,8 +219,8 @@ Stores A into the memory address currently in register MH.
 
 For example:
 ```
-1  MOV 100 MH
-2  STORE R5
+0  MOV 100 MH
+1  STORE R5
 ```
 >   Moves the main memory read/write head to position 100 or the 101st memory.
 >   address and stores the value of register 5 into it.
@@ -231,7 +231,7 @@ Stores A as an ASCII char into the string buffer.
 
 For example:
 ```
-1  APND 65
+0  APND 65
 ```
 >   Stores the character "A" into the string buffer.
 
@@ -241,12 +241,12 @@ Flushes the contents of the string buffer into console.
 
 For example:
 ```
-1  APND 104
-2  APND 101
+0  APND 104
+1  APND 101
+2  APND 108
 3  APND 108
-4  APND 108
-5  APND 111
-6  PRNT
+4  APND 111
+5  PRNT
 ```
 >   Stores "hello" into the string buffer and prints it to the console.
 
@@ -256,7 +256,7 @@ Flushes the contents of the string buffer to clear it.
 
 For example:
 ```
-1  DUMP
+0  DUMP
 ```
 >   Clears anything that is currently in the string buffer.
 
