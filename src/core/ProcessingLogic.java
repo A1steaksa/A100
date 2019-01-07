@@ -483,6 +483,16 @@ public class ProcessingLogic {
 			PRNT();
 			
 			break;
+			
+		case "CLR":
+			
+			if( splitLine.length != 1 ) {
+				error( Strings.WrongNumberOfArguments );
+			}
+			
+			CLR();
+			
+			break;
 		default:
 			
 			System.out.println( "Ran into default line:" + splitLine[ 0 ] + ":Which should really not happen" );
@@ -766,6 +776,11 @@ public class ProcessingLogic {
 	public void PRNT() {
 		print( readStringBuffer() );
 		clearStringBuffer();
+	}
+	
+	//Clears the console
+	public void CLR() {
+		window.clearConsole();
 	}
 
 }

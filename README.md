@@ -187,7 +187,7 @@ For example:
 ```
 1  BGT 500 R3 CHILDNODE
 ```
->   Branches to the label CHILDNODE if the literal 500 is greater than register
+>   Branches to the label CHILDNODE if the literal 500 is greater than register.
 >   3.
 
 ### BR \<A\>
@@ -202,7 +202,7 @@ For example:
 
 ### LOAD \<A\>
 
-Loads the value of the memory address currently in register MH and stores it
+Loads the value of the memory address currently in register MH and stores it.
 into register A.
 
 For example:
@@ -210,7 +210,7 @@ For example:
 1  MOV 5 MH
 2  LOAD R1
 ```
->   Moves the main memory read/write head to position 5 or the 6th memory
+>   Moves the main memory read/write head to position 5 or the 6th memory.
 >   address and loads its value into register 1.
 
 ### STORE \<A\>
@@ -222,22 +222,22 @@ For example:
 1  MOV 100 MH
 2  STORE R5
 ```
->   Moves the main memory read/write head to position 100 or the 101st memory
+>   Moves the main memory read/write head to position 100 or the 101st memory.
 >   address and stores the value of register 5 into it.
 
 ### APND \<A\>
 
-Stores A as an ASCII char into the string buffer
+Stores A as an ASCII char into the string buffer.
 
 For example:
 ```
 1  APND 65
 ```
->   Stores the character "A" into the string buffer
+>   Stores the character "A" into the string buffer.
 
 ### PRNT
 
-Flushes the contents of the string buffer into console
+Flushes the contents of the string buffer into console.
 
 For example:
 ```
@@ -248,14 +248,24 @@ For example:
 5  APND 111
 6  PRNT
 ```
->   Stores "hello" into the string buffer and prints it to the console
+>   Stores "hello" into the string buffer and prints it to the console.
 
 ### DUMP
 
-Flushes the contents of the string buffer to clear it
+Flushes the contents of the string buffer to clear it.
 
 For example:
 ```
 1  DUMP
 ```
->   Clears anything that is currently in the string buffer
+>   Clears anything that is currently in the string buffer.
+
+### CLR
+
+Flushes the contents of the console to clear it.
+
+For example:
+```
+1  CLR
+```
+>   Clears anything that is currently in the string buffer.
