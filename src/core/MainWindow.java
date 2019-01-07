@@ -67,6 +67,9 @@ public class MainWindow extends JFrame{
 	//Stores the labels associated with main memory
 	JLabel[]  mainMemoryLabels = new JLabel[ Config.mainMemoryLength ];
 
+	//Stores the labels associated with the string buffer
+	JLabel[]  stringBufferLabels = new JLabel[ Config.stringBufferSize ];
+	
 	//Keeps track of whether or not the file has been changed
 	boolean fileHasChanged = false;
 
@@ -110,6 +113,12 @@ public class MainWindow extends JFrame{
 	//Main memory scroll bar
 	JScrollPane mainMemoryPanelScrollPane;
 	
+	//Panel for the string buffer
+	JPanel stringBufferPanel;
+	
+	//String buffer scroll bar
+	JScrollPane stringBufferPanelScrollPane;
+	
 	//A reference to the processing logic
 	private ProcessingLogic logic;
 	
@@ -135,7 +144,7 @@ public class MainWindow extends JFrame{
 
 		//Main window properties
 		this.setTitle( Config.titleBase );
-		this.setSize( new Dimension( 600, 750 ) );
+		this.setSize( new Dimension( 600, 850 ) );
 		this.setMinimumSize( new Dimension( 600, 500 ) );
 		this.setLocationByPlatform( true );
 		this.setLayout( new BorderLayout() );
@@ -300,6 +309,7 @@ public class MainWindow extends JFrame{
 		registersPanelScrollPane.setMaximumSize( new Dimension( Integer.MAX_VALUE, 50 ) );
 		registersPanelScrollPane.setVerticalScrollBarPolicy( JScrollPane.VERTICAL_SCROLLBAR_NEVER );
 		
+		
 		//Main memory
 		mainMemoryPanel = new JPanel();
 		mainMemoryPanel.setLayout( new BoxLayout( mainMemoryPanel, BoxLayout.X_AXIS ) );
@@ -317,6 +327,25 @@ public class MainWindow extends JFrame{
 		mainMemoryPanelScrollPane.setPreferredSize( new Dimension( Integer.MAX_VALUE, 75 ) );
 		mainMemoryPanelScrollPane.setVerticalScrollBarPolicy( JScrollPane.VERTICAL_SCROLLBAR_NEVER );
 		
+		
+		//String buffer
+		stringBufferPanel = new JPanel();
+		stringBufferPanel.setLayout( new BoxLayout( stringBufferPanel, BoxLayout.X_AXIS ) );
+		stringBufferPanel.setPreferredSize( new Dimension( Config.stringBufferSize * 50, 50 ) );
+		
+		//Add buffer spaces
+		for (int i = 0; i < Config.stringBufferSize; i++) {
+			addStringBufferCharacter( i, "" );
+		}
+
+		//String buffer scroll pane
+		stringBufferPanelScrollPane = new JScrollPane( stringBufferPanel );
+		stringBufferPanelScrollPane.setMinimumSize( new Dimension( Integer.MAX_VALUE, 75 ) );
+		stringBufferPanelScrollPane.setMaximumSize( new Dimension( Integer.MAX_VALUE, 75 ) );
+		stringBufferPanelScrollPane.setPreferredSize( new Dimension( Integer.MAX_VALUE, 75 ) );
+		stringBufferPanelScrollPane.setVerticalScrollBarPolicy( JScrollPane.VERTICAL_SCROLLBAR_NEVER );
+		
+		
 		//Console
 		consoleTextArea = new JTextArea( 3, 10 );
 		consoleTextArea.setFont( font );
@@ -331,13 +360,14 @@ public class MainWindow extends JFrame{
 		bottomPanel.setLayout( new BoxLayout( bottomPanel, BoxLayout.Y_AXIS ) );
 		bottomPanel.add( registersPanelScrollPane );
 		bottomPanel.add( mainMemoryPanelScrollPane );
+		bottomPanel.add( stringBufferPanelScrollPane );
 		bottomPanel.add( consoleScrollPane );
 
 		//Split pane to split code from the bottom pieces
 		JSplitPane topSplitPane = new JSplitPane( JSplitPane.VERTICAL_SPLIT );
 		topSplitPane.setTopComponent( codeScrollPane );
 		topSplitPane.setBottomComponent( bottomPanel );
-		topSplitPane.setDividerLocation( 350 );
+		topSplitPane.setDividerLocation( 300 );
 		this.add( topSplitPane, BorderLayout.CENTER );
 
 		//New button
@@ -463,7 +493,6 @@ public class MainWindow extends JFrame{
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 
-				
 				logic.fastForward();
 
 			}
@@ -523,6 +552,8 @@ public class MainWindow extends JFrame{
 
 	//Prints a string to the console
 	public void print( String str ) {
+		str = str.trim();
+		
 		consoleTextArea.append( str + "\n" );
 	}
 
@@ -647,7 +678,7 @@ public class MainWindow extends JFrame{
 	
 	//Adds a memory space to the UI
 	public void addMainMemorySpace( int key, int value ) {
-		//The panel to contain the register
+		//The panel to contain the memory space
 		JPanel mainMemorySpace = new JPanel();
 		mainMemorySpace.setLayout( new BorderLayout() );
 		mainMemorySpace.setMinimumSize( new Dimension( 50, -1 ) );
@@ -673,6 +704,36 @@ public class MainWindow extends JFrame{
 
 		//Add this memory space to the list
 		mainMemoryPanel.add( mainMemorySpace );
+	}
+	
+	public void addStringBufferCharacter( int key, String value ) {
+		
+		//The panel to contain the string buffer character
+		JPanel stringBufferCharacter = new JPanel();
+		stringBufferCharacter.setLayout( new BorderLayout() );
+		stringBufferCharacter.setMinimumSize( new Dimension( 50, -1 ) );
+		stringBufferCharacter.setPreferredSize( new Dimension( 50, -1 ) );
+
+		//Add a border
+		stringBufferCharacter.setBorder( BorderFactory.createLineBorder( Color.black ) );
+
+		//The label to hold the character index
+		JLabel topLabel = new JLabel( String.valueOf( key ) );
+		topLabel.setHorizontalAlignment( JLabel.CENTER );
+		topLabel.setFont( font );
+		stringBufferCharacter.add( topLabel, BorderLayout.NORTH );
+
+		//The label to hold the character string
+		JLabel bottomLabel = new JLabel( String.valueOf( value ) );
+		bottomLabel.setHorizontalAlignment( JLabel.CENTER );
+		bottomLabel.setFont( font );
+		stringBufferCharacter.add( bottomLabel, BorderLayout.SOUTH );
+		
+		//Add the bottom label to the string buffer array so it can be edited later
+		stringBufferLabels[ key ] = bottomLabel;
+
+		//Add this memory space to the list
+		stringBufferPanel.add( stringBufferCharacter );
 	}
 	
 	//This highlights a memory address as being the currently selected one
@@ -712,6 +773,11 @@ public class MainWindow extends JFrame{
 	//Change the text of a memory label
 	public void setMainMemoryValue( int address, int value ) {
 		mainMemoryLabels[ address ].setText( String.valueOf( value ) );
+	}
+	
+	//Change the text of a string buffer label
+	public void setStringBufferValue( int address, String value ) {
+		stringBufferLabels[ address ].setText( value );
 	}
 	
 	//Returns whether or not a file is open

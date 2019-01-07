@@ -1,10 +1,8 @@
 package core;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import javax.swing.JLabel;
 
 import misc.Config;
 import misc.Strings;
@@ -25,6 +23,12 @@ public class ProcessingLogic {
 	
 	//Main memory's array
 	public int[] mainMemory = new int[ Config.mainMemoryLength ];
+	
+	//String buffer linked list
+	public String[] stringBuffer = new String[ Config.stringBufferSize ];
+	
+	//Keeps track of where we are in the string buffer so we don't overwrite anything
+	public int stringBufferPosition = 0;
 	
 	//Tracks our last executed line for error reporting
 	public int lastLine = -1;
@@ -110,6 +114,54 @@ public class ProcessingLogic {
 		
 	}
 	
+	//Writes a character to the string buffer
+	public void writeToStringBuffer( int value ) {
+		
+		//The value must be in the appropriate ASCII range
+		if( value < 32 || value > 126 ) {
+			error( Strings.BufferValueOutOfASCIIRange );
+		}
+		
+		//Convert the ASCII value to a string
+		String charValue = String.valueOf( ( (char) value ) );
+		
+		//Write to buffer
+		stringBuffer[ stringBufferPosition ] = charValue;
+		
+		//Update UI
+		window.setStringBufferValue( stringBufferPosition, charValue );
+		
+		//Increment our stringBufferPosition
+		stringBufferPosition++;
+		
+	}
+	
+	//Returns the full string from the string buffer
+	public String readStringBuffer() {
+		String output = "";
+		
+		for (int i = 0; i < stringBufferPosition; i++) {
+			output += stringBuffer[ i ];
+		}
+		
+		return output;
+	}
+	
+	//Clears the string buffer
+	public void clearStringBuffer() {
+		stringBuffer = new String[ Config.stringBufferSize ];
+		
+		//Reset every character and update the UI
+		for (int i = 0; i < stringBuffer.length; i++) {
+			stringBuffer[ i ] = "";
+			window.setStringBufferValue( i,  "" );
+		}
+		
+		//Reset the string buffer position
+		stringBufferPosition = 0;
+		
+	}
+	
 	//Stops execution as soon as it is safe to
 	public void halt() {
 		//Depending on how we finished, print out a success or failure message
@@ -145,6 +197,9 @@ public class ProcessingLogic {
 		
 		//Reset last line
 		lastLine = 0;
+		
+		//Reset string buffer
+		clearStringBuffer();
 		
 		//Reset the memory head
 		setRegisterValue( "MH", 0 );
@@ -401,6 +456,33 @@ public class ProcessingLogic {
 			
 			break;
 			
+		case "APND":
+			
+			if( splitLine.length != 2 ) {
+				error( Strings.WrongNumberOfArguments );
+			}
+			
+			APND( splitLine[ 1 ] );
+			
+			break;
+			
+		case "DUMP":
+			
+			if( splitLine.length != 1 ) {
+				error( Strings.WrongNumberOfArguments );
+			}
+			
+			DUMP();
+
+		case "PRNT":
+			
+			if( splitLine.length != 1 ) {
+				error( Strings.WrongNumberOfArguments );
+			}
+			
+			PRNT();
+			
+			break;
 		default:
 			
 			System.out.println( "Ran into default line:" + splitLine[ 0 ] + ":Which should really not happen" );
@@ -660,5 +742,30 @@ public class ProcessingLogic {
 		
 	}
 	
+	/*
+	 * String buffer
+	 */
+	
+	//Appends a character to the string buffer
+	public void APND( String A ) {
+		
+		//Get A's value
+		int valueA = getArgumentValue( A );
+		
+		//Write to the buffer
+		writeToStringBuffer( valueA );
+		
+ 	}
+	
+	//Clears the string buffer
+	public void DUMP() {
+		clearStringBuffer();
+	}
+	
+	//Flushes the string buffer to the console
+	public void PRNT() {
+		print( readStringBuffer() );
+		clearStringBuffer();
+	}
 
 }

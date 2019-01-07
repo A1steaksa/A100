@@ -39,5 +39,8 @@ public class Config {
 	
 	//The size of main memory
 	public static int mainMemoryLength = 10000;
+	
+	//The size of the string buffer, in characters
+	public static int stringBufferSize = 256;
 
 }

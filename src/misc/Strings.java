@@ -22,6 +22,13 @@ public class Strings {
 	public static String EmptyFile = "You cannot run a file without executable commands!";
 	
 	/*
+	 * String buffer errors
+	 */
+	
+	public static String BufferValueOutOfASCIIRange = "A value outside of the range [32, 126] was written to the string buffer!";
+	
+	
+	/*
 	 * Exit condition messages
 	 */
 	public static String ExitWithError = "Execution halted with error(s)";

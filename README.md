@@ -224,3 +224,38 @@ For example:
 ```
 >   Moves the main memory read/write head to position 100 or the 101st memory
 >   address and stores the value of register 5 into it.
+
+### APND \<A\>
+
+Stores A as an ASCII char into the string buffer
+
+For example:
+```
+1  APND 65
+```
+>   Stores the character "A" into the string buffer
+
+### PRNT
+
+Flushes the contents of the string buffer into console
+
+For example:
+```
+1  APND 104
+2  APND 101
+3  APND 108
+4  APND 108
+5  APND 111
+6  PRNT
+```
+>   Stores "hello" into the string buffer and prints it to the console
+
+### DUMP
+
+Flushes the contents of the string buffer to clear it
+
+For example:
+```
+1  DUMP
+```
+>   Clears anything that is currently in the string buffer
