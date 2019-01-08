@@ -269,3 +269,23 @@ For example:
 1  CLR
 ```
 >   Clears anything that is currently in the string buffer.
+
+### ASL
+
+Performs an arithmetic shift left on A by B bits and stores the value in register C
+
+For example:
+```
+1  ASL 2 1 R3
+```
+>   Shifts the literal 2 left by 1 bit and stores the resulting 4 in register 3
+
+### ASR
+
+Performs an arithmetic shift right on A by B bits and stores the value in register C
+
+For example:
+```
+1  ASR R5 R2 R3
+```
+>   Shifts the value of register 5 right by the value of register 2 bits and stores the result in register 3

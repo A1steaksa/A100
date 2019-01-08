@@ -7,7 +7,7 @@ import java.util.Map.Entry;
 import misc.Config;
 import misc.Strings;
 
-public class ProcessingLogic {
+public class ProcessingLogic implements Runnable{
 
 	//A flag that stops the next step from executing when set
 	public boolean halt = false;
@@ -32,6 +32,14 @@ public class ProcessingLogic {
 	
 	//Tracks our last executed line for error reporting
 	public int lastLine = -1;
+	
+	@Override
+	public void run() {
+		
+		//This is run as a thread while fast forwarding
+		fastForward();
+		
+	}
 	
 	//Called when all main sections are created in primary
 	public void start() {
@@ -492,6 +500,24 @@ public class ProcessingLogic {
 			
 			CLR();
 			
+		case "ASL":
+			
+			if( splitLine.length != 4 ) {
+				error( Strings.WrongNumberOfArguments );
+			}
+			
+			ASL( splitLine[ 1 ], splitLine[ 2 ], splitLine[ 3 ] );
+			
+			break;
+			
+		case "ASR":
+			
+			if( splitLine.length != 4 ) {
+				error( Strings.WrongNumberOfArguments );
+			}
+			
+			ASR( splitLine[ 1 ], splitLine[ 2 ], splitLine[ 3 ] );
+			
 			break;
 		default:
 			
@@ -528,6 +554,12 @@ public class ProcessingLogic {
 		//As long as there are steps to take, step
 		while( hasNextLine() ) {
 			step();
+			try {
+				Thread.sleep( 100 );
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		
 	}
@@ -782,5 +814,34 @@ public class ProcessingLogic {
 	public void CLR() {
 		window.clearConsole();
 	}
-
+	
+	//Performs an arithmetic shift left of A by B amount and stores it in register C
+	public void ASL( String A, String B, String C ) {
+		
+		//Get A and B values
+		int valueA = getArgumentValue( A );
+		int valueB = getArgumentValue( B );
+		
+		//Shift A by amount B
+		int output = valueA << valueB;
+		
+		//Store the output in register C
+		setRegisterValue( C, output );
+		
+	}
+	
+	//Performs an arithmetic shift right of A by B amount and stores it in register C
+	public void ASR( String A, String B, String C ) {
+		
+		//Get A and B values
+		int valueA = getArgumentValue( A );
+		int valueB = getArgumentValue( B );
+		
+		//Shift A by amount B
+		int output = valueA >> valueB;
+		
+		//Store the output in register C
+		setRegisterValue( C, output );
+		
+	}
 }

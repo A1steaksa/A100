@@ -122,6 +122,9 @@ public class MainWindow extends JFrame{
 	//A reference to the processing logic
 	private ProcessingLogic logic;
 	
+	//The thread we'll use while fast forwarding
+	Thread fastForwardThread;
+	
 	public void start(){
 
 		//Get the processing logic reference
@@ -326,7 +329,7 @@ public class MainWindow extends JFrame{
 		mainMemoryPanelScrollPane.setMaximumSize( new Dimension( Integer.MAX_VALUE, 75 ) );
 		mainMemoryPanelScrollPane.setPreferredSize( new Dimension( Integer.MAX_VALUE, 75 ) );
 		mainMemoryPanelScrollPane.setVerticalScrollBarPolicy( JScrollPane.VERTICAL_SCROLLBAR_NEVER );
-		
+		mainMemoryPanelScrollPane.getHorizontalScrollBar().setUnitIncrement( 16 );
 		
 		//String buffer
 		stringBufferPanel = new JPanel();
@@ -344,7 +347,7 @@ public class MainWindow extends JFrame{
 		stringBufferPanelScrollPane.setMaximumSize( new Dimension( Integer.MAX_VALUE, 75 ) );
 		stringBufferPanelScrollPane.setPreferredSize( new Dimension( Integer.MAX_VALUE, 75 ) );
 		stringBufferPanelScrollPane.setVerticalScrollBarPolicy( JScrollPane.VERTICAL_SCROLLBAR_NEVER );
-		
+		stringBufferPanelScrollPane.getHorizontalScrollBar().setUnitIncrement( 16 );
 		
 		//Console
 		consoleTextArea = new JTextArea( 3, 10 );
@@ -493,7 +496,8 @@ public class MainWindow extends JFrame{
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 
-				logic.fastForward();
+				fastForwardThread = new Thread( logic );
+				fastForwardThread.start();
 
 			}
 
@@ -513,6 +517,12 @@ public class MainWindow extends JFrame{
 				//If we're running, stop execution and switch to editing mode
 				if( isRunning ) {
 
+					//Stop the fast forward thread if it's running
+					if( fastForwardThread.isAlive() ) {
+						logic.halt = true;
+					}
+					
+					
 					switchToEditMode();
 
 				}else {
