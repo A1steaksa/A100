@@ -1,5 +1,20 @@
 # A100 Reference Manual
 
+## User Interface
+
+A100's interface is split into 3 sections:
+> 1. The code window
+> 2. The debug information
+> 3. The console
+
+![](https://i.imgur.com/rjEqW4t.png)
+
+The code window is where editing is done and code execution can be followed.
+
+The debug information portion is where you can see the current state of all registers, main memory, and the string buffer.
+
+The console is where error information is displayed and where print statements are shown.
+
 ## Terms & Misc.
 
 ### A Note on this Documentation
