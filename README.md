@@ -179,9 +179,9 @@ Checks if A is equal to B and branches to label or line number literal C if that
 
 For example:
 ```
-0  BEQ R0 8 LOOP
+0  BEQ R0 8 5
 ```
->   Compares register 0 and the literal 8 and branches to the label LOOP if
+>   Compares register 0 and the literal 8 and branches to the literal line number 5 if
 >   they’re equal.
 
 ### BGT \<A\> \<B\> \<C\>
