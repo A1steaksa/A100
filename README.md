@@ -108,6 +108,10 @@ For example:
 ```
 >   Is an example of a multi-word label.
 
+### Branching
+
+Technically speaking, anywhere you can use a label name you can also use a line number literal but I would heavily discourage usage of this as line numbers are changed during compilation in ways they are not during debugging and interphretation which will lead to line numbers being potentially wildly off.
+
 ### Main Memory
 
 Main memory in A1 is a set of 10,000 memory addresses in the range [0, 9999].
@@ -164,7 +168,7 @@ For example:
 
 ### BNE \<A\> \<B\> \<C\>
 
-Checks if A is not equal to B and branches to label or line number literal C if that is the case.
+Checks if A is not equal to B and branches to label C if that is the case.
 
 For example:
 ```
@@ -175,7 +179,7 @@ For example:
 
 ### BEQ \<A\> \<B\> \<C\>
 
-Checks if A is equal to B and branches to label or line number literal C if that is the case.
+Checks if A is equal to B and branches to label C if that is the case.
 
 For example:
 ```
@@ -186,7 +190,7 @@ For example:
 
 ### BGT \<A\> \<B\> \<C\>
 
-Checks if A is greater than B and branches to label or line number literal C if that is the case.
+Checks if A is greater than B and branches to label C if that is the case.
 
 For example:
 ```
@@ -196,7 +200,7 @@ For example:
 
 ### BLT \<A\> \<B\> \<C\>
 
-Checks if A is less than B and branches to label or line number literal C if that is the case.
+Checks if A is less than B and branches to label C if that is the case.
 
 For example:
 ```
@@ -207,7 +211,7 @@ For example:
 
 ### BR \<A\>
 
-Branches without conditional checking to label or line number literal A.
+Branches without conditional checking to label A.
 
 For example:
 ```
