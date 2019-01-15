@@ -95,7 +95,7 @@ above that will result in a halting error.
 
 ### Labels
 
-Labels in A1 can be any string without spaces that is ended by a “:”.
+Labels in A1 can be any string containing at least 1 non-number character, without spaces, that is ended by a “:”.
 
 For example:
 ```
