@@ -287,7 +287,7 @@ For example:
 ```
 >   Clears anything that is currently in the string buffer.
 
-### ASL
+### ASL \<A\> \<B\> \<C\>
 
 Performs an arithmetic shift left on A by B bits and stores the value in register C
 
@@ -297,7 +297,7 @@ For example:
 ```
 >   Shifts the literal 2 left by 1 bit and stores the resulting 4 in register 3
 
-### ASR
+### ASR \<A\> \<B\> \<C\>
 
 Performs an arithmetic shift right on A by B bits and stores the value in register C
 
