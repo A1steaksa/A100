@@ -164,7 +164,7 @@ For example:
 
 ### BNE \<A\> \<B\> \<C\>
 
-Checks if A is not equal to B and branches to label C if that is the case.
+Checks if A is not equal to B and branches to label or line number literal C if that is the case.
 
 For example:
 ```
@@ -175,7 +175,7 @@ For example:
 
 ### BEQ \<A\> \<B\> \<C\>
 
-Checks if A is equal to B and branches to label C if that is the case.
+Checks if A is equal to B and branches to label or line number literal C if that is the case.
 
 For example:
 ```
@@ -186,7 +186,7 @@ For example:
 
 ### BGT \<A\> \<B\> \<C\>
 
-Checks if A is greater than B and branches to label C if that is the case.
+Checks if A is greater than B and branches to label or line number literal C if that is the case.
 
 For example:
 ```
@@ -196,7 +196,7 @@ For example:
 
 ### BLT \<A\> \<B\> \<C\>
 
-Checks if A is less than B and branches to label C if that is the case.
+Checks if A is less than B and branches to label or line number literal C if that is the case.
 
 For example:
 ```
@@ -207,7 +207,7 @@ For example:
 
 ### BR \<A\>
 
-Branches without conditional checking to label A.
+Branches without conditional checking to label or line number literal A.
 
 For example:
 ```
