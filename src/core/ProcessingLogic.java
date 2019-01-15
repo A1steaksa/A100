@@ -283,16 +283,26 @@ public class ProcessingLogic implements Runnable{
 		}
 	}
 	
-	//Gets the line number of a label
-	public int getLabelLineNumber( String labelName ){
+	//Gets the line number of an argument either as a literal or from a label
+	public int getArgumentLineNumber( String argument ){
 		
-		//Get the label's line number
-		Integer lineNumber = labels.get( labelName );
+		//Check if this is a literal
+		try {
+			int lineNumber = Integer.parseInt( argument ) - 1;
+			
+			//If it is a literal, just return that
+			return lineNumber;
+		}catch( Exception e ) {}
+		
+		//If it's not a literal then it should be a label
 		
 		//Make sure we have a valid label
-		if( lineNumber == null ) {
+		if( !labels.containsKey( argument ) ) {
 			error( Strings.InvalidLabelReference );
 		}
+		
+		//Get the label's line number
+		int lineNumber = labels.get( argument );
 		
 		return lineNumber;
 	}
@@ -619,7 +629,8 @@ public class ProcessingLogic implements Runnable{
 		setRegisterValue( B, valueA );
 
 	}
-
+	
+	//Performs the addition operation
 	public void ADD( String A, String B, String C ) {
 
 		//Process output register C
@@ -639,7 +650,8 @@ public class ProcessingLogic implements Runnable{
 		setRegisterValue( C, result );
 
 	}
-
+	
+	//Performs the subtraction operation
 	public void SUB( String A, String B, String C ) {
 
 		//Process output register C
@@ -672,7 +684,7 @@ public class ProcessingLogic implements Runnable{
 		int valueB = getArgumentValue( B );
 		
 		//Get the label's line number
-		int lineNumber = getLabelLineNumber( labelName );
+		int lineNumber = getArgumentLineNumber( labelName );
 		
 		//Check if they're not equal
 		if( valueA != valueB ) {
@@ -693,7 +705,7 @@ public class ProcessingLogic implements Runnable{
 		int valueB = getArgumentValue( B );
 
 		//Get the label's line number
-		int lineNumber = getLabelLineNumber( labelName );
+		int lineNumber = getArgumentLineNumber( labelName );
 
 		//Check if they're not equal
 		if( valueA == valueB ) {
@@ -703,7 +715,6 @@ public class ProcessingLogic implements Runnable{
 			//Jump to the next executable command
 			incrementProgramCounter();
 		}
-
 	}
 	
 	//Branch greater than
@@ -714,7 +725,7 @@ public class ProcessingLogic implements Runnable{
 		int valueB = getArgumentValue( B );
 
 		//Get the label's line number
-		int lineNumber = getLabelLineNumber( labelName );
+		int lineNumber = getArgumentLineNumber( labelName );
 
 		//Check if they're not equal
 		if( valueA > valueB ) {
@@ -735,7 +746,7 @@ public class ProcessingLogic implements Runnable{
 		int valueB = getArgumentValue( B );
 
 		//Get the label's line number
-		int lineNumber = getLabelLineNumber( labelName );
+		int lineNumber = getArgumentLineNumber( labelName );
 
 		//Check if they're not equal
 		if( valueA < valueB ) {
@@ -752,7 +763,7 @@ public class ProcessingLogic implements Runnable{
 	public void BR( String labelName ) {
 		
 		//Get the label's line number
-		int lineNumber = getLabelLineNumber( labelName );
+		int lineNumber = getArgumentLineNumber( labelName );
 		
 		//Branch to line number
 		setRegisterValue( "PC", lineNumber );

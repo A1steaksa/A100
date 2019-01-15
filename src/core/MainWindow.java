@@ -518,9 +518,12 @@ public class MainWindow extends JFrame{
 				if( isRunning ) {
 
 					//Stop the fast forward thread if it's running
-					if( fastForwardThread.isAlive() ) {
-						logic.halt = true;
+					if( fastForwardThread != null ) {
+						if( fastForwardThread.isAlive() ) {
+							logic.halt = true;
+						}
 					}
+					
 					
 					
 					switchToEditMode();
@@ -636,6 +639,7 @@ public class MainWindow extends JFrame{
 		//Update the tooltip
 		runStopButton.setToolTipText( "Stop running" );
 
+		
 		//Display a selected line number while we're editing
 		codeLineNumber.setCurrentLineForeground( Color.BLACK );
 		codeLineNumber.repaint();
