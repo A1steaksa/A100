@@ -108,8 +108,6 @@ For example:
 ```
 >   Is an example of a multi-word label.
 
-### Branching
-
 Technically speaking, anywhere you can use a label name you can also use a line number literal but I would heavily discourage usage of this as line numbers are changed during compilation in ways they are not during debugging and interphretation which will lead to line numbers being potentially wildly off.
 
 ### Main Memory
