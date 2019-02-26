@@ -292,7 +292,6 @@ public class MainWindow extends JFrame{
 		//Registers
 		registersPanel = new JPanel();
 		registersPanel.setLayout( new BoxLayout( registersPanel, BoxLayout.X_AXIS ) );
-		registersPanel.setPreferredSize( new Dimension( 50 * Config.registerCount, 50 ) );
 
 		//Add special registers
 		//Program counter
@@ -301,15 +300,21 @@ public class MainWindow extends JFrame{
 		//Memory read/write head
 		addRegister( "MH", 0 );
 		
+		int specialRegisterCount = registersPanel.getComponentCount();
+		
 		//Add regular registers
 		for (int i = 0; i < Config.registerCount; i++) {
 			addRegister( "R" + i, 0 );
 		}
+		
+		registersPanel.setPreferredSize( new Dimension( 50 * ( Config.registerCount + specialRegisterCount ), 50 ) );
 
 		//Registers scroll pane
 		JScrollPane registersPanelScrollPane = new JScrollPane( registersPanel );
-		registersPanelScrollPane.setMinimumSize( new Dimension( Integer.MAX_VALUE, 50 ) );
-		registersPanelScrollPane.setMaximumSize( new Dimension( Integer.MAX_VALUE, 50 ) );
+		registersPanelScrollPane.setMinimumSize( new Dimension( Integer.MAX_VALUE, 75 ) );
+		registersPanelScrollPane.setMaximumSize( new Dimension( Integer.MAX_VALUE, 75 ) );
+		registersPanelScrollPane.setPreferredSize( new Dimension( Integer.MAX_VALUE, 75 ) );
+		registersPanelScrollPane.getHorizontalScrollBar().setUnitIncrement( 16 );
 		registersPanelScrollPane.setVerticalScrollBarPolicy( JScrollPane.VERTICAL_SCROLLBAR_NEVER );
 		
 		

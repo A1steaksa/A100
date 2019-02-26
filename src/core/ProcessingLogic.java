@@ -531,7 +531,7 @@ public class ProcessingLogic implements Runnable{
 			break;
 		default:
 			
-			System.out.println( "Ran into default line:" + splitLine[ 0 ] + ":Which should really not happen" );
+			System.out.println( "Ran into default line:" + splitLine[ 0 ] + ":Which should never happen" );
 			
 			error( Strings.UnrecognizedOpcode );
 		}
