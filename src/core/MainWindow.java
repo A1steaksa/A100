@@ -667,8 +667,8 @@ public class MainWindow extends JFrame{
 		//The panel to contain the register
 		JPanel register = new JPanel();
 		register.setLayout( new BorderLayout() );
-		register.setMinimumSize( new Dimension( 50, -1 ) );
-		register.setPreferredSize( new Dimension( 50, -1 ) );
+		register.setMinimumSize( new Dimension( 65, -1 ) );
+		register.setPreferredSize( new Dimension( 65, -1 ) );
 
 		//Add a border
 		register.setBorder( BorderFactory.createLineBorder( Color.black ) );

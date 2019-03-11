@@ -388,11 +388,6 @@ public class ProcessingLogic implements Runnable{
 			if( splitLine.length != 3 ) {
 				error( Strings.WrongNumberOfArguments );
 			}
-
-			//TESTING
-			if( splitLine[2].equalsIgnoreCase( "pc" ) ) {
-				System.out.println( "break" );
-			}
 			
 			MOV( splitLine[ 1 ], splitLine[ 2 ] );
 			break;
