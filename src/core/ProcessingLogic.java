@@ -213,9 +213,13 @@ public class ProcessingLogic implements Runnable{
 		setRegisterValue( "MH", 0 );
 		
 		//Move the program counter to the first executable line
-		if( shouldSkipLine( 0 ) ) {
-			incrementProgramCounter();
-		}
+//		if( shouldSkipLine( 0 ) ) {
+//			incrementProgramCounter();
+//		}
+		
+		//Set PC to below start and increment PC
+		setRegisterValue( "PC", -1 );
+		incrementProgramCounter();
 		
 		//If there's nothing to execute, throw an error to that effect
 		if( getRegisterValue( "PC" ) >= window.getLineCount() ) {
@@ -362,12 +366,12 @@ public class ProcessingLogic implements Runnable{
 		line = line.toUpperCase();
 		line = line.trim();
 		
-		//Update last line
-		lastLine = getRegisterValue( "PC" );
-		
 		//Increment the program counter
 		//setRegisterValue( "PC",  getRegisterValue( "PC" ) + 1 );
 		incrementProgramCounter();
+		
+		//Update last line
+		lastLine = getRegisterValue( "PC" );
 		
 		//Break the line apart by spaces as those are our delimiter
 		String[] splitLine = line.split( "\\s+" );
@@ -385,6 +389,11 @@ public class ProcessingLogic implements Runnable{
 				error( Strings.WrongNumberOfArguments );
 			}
 
+			//TESTING
+			if( splitLine[2].equalsIgnoreCase( "pc" ) ) {
+				System.out.println( "break" );
+			}
+			
 			MOV( splitLine[ 1 ], splitLine[ 2 ] );
 			break;
 		case "ADD":
@@ -627,6 +636,12 @@ public class ProcessingLogic implements Runnable{
 
 		//If there are no errors, store AValue in the register corresponding to BValue
 		setRegisterValue( B, valueA );
+		
+		//Special case for modifying PC
+		//If we wrote to PC, increment the PC
+		if( B.equals( "PC" ) ) {
+			incrementProgramCounter();
+		}
 
 	}
 	
